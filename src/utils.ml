@@ -12,3 +12,5 @@ let read_file filename =
 	with End_of_file ->
 		close_in chan;
   		List.rev !lines
+
+let read_file_to_string filename = String.concat "\n" (read_file filename)

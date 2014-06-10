@@ -1,0 +1,3 @@
+#/bin/bash
+
+ocamlbuild -libs unix,str -Is src,examples/blog/handlers examples/blog/main.native && clear

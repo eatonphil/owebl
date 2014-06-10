@@ -1,0 +1,1 @@
+To run the example, build first (`build/compile` from the root directory) then run the executable.

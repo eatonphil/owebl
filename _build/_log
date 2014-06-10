@@ -1,40 +1,43 @@
 ### Starting build.
-# Target: main.ml.depends, tags: { extension:ml, file:main.ml, ocaml, ocamldep, quiet }
-/usr/local/bin/ocamldep.opt -modules main.ml > main.ml.depends # cached
-# Target: handlers/about.ml.depends, tags: { extension:ml, file:handlers/about.ml, ocaml, ocamldep, quiet }
-/usr/local/bin/ocamldep.opt -modules handlers/about.ml > handlers/about.ml.depends
-# Target: handlers/index.ml.depends, tags: { extension:ml, file:handlers/index.ml, ocaml, ocamldep, quiet }
-/usr/local/bin/ocamldep.opt -modules handlers/index.ml > handlers/index.ml.depends # cached
-# Target: handlers/index.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:handlers/index.cmo, file:handlers/index.ml, implem, ocaml, quiet }
-/usr/local/bin/ocamlc.opt -c -I handlers -o handlers/index.cmo handlers/index.ml # cached
-# Target: server.ml.depends, tags: { extension:ml, file:server.ml, ocaml, ocamldep, quiet }
-/usr/local/bin/ocamldep.opt -modules server.ml > server.ml.depends # cached
-# Target: handler.ml.depends, tags: { extension:ml, file:handler.ml, ocaml, ocamldep, quiet }
-/usr/local/bin/ocamldep.opt -modules handler.ml > handler.ml.depends # cached
-# Target: handler.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:handler.cmo, file:handler.ml, implem, ocaml, quiet }
-/usr/local/bin/ocamlc.opt -c -I handlers -o handler.cmo handler.ml # cached
-# Target: utils.ml.depends, tags: { extension:ml, file:utils.ml, ocaml, ocamldep, quiet }
-/usr/local/bin/ocamldep.opt -modules utils.ml > utils.ml.depends # cached
-# Target: utils.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:utils.cmo, file:utils.ml, implem, ocaml, quiet }
-/usr/local/bin/ocamlc.opt -c -I handlers -o utils.cmo utils.ml # cached
-# Target: server.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:server.cmo, file:server.ml, implem, ocaml, quiet }
-/usr/local/bin/ocamlc.opt -c -I handlers -o server.cmo server.ml # cached
-# Target: handlers/about.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:handlers/about.cmo, file:handlers/about.ml, implem, ocaml, quiet }
-/usr/local/bin/ocamlc.opt -c -I handlers -o handlers/about.cmo handlers/about.ml
-# Target: main.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:main.cmo, file:main.ml, implem, ocaml, quiet }
-/usr/local/bin/ocamlc.opt -c -I handlers -o main.cmo main.ml # cached
-# Target: handlers/index.cmx, tags: { compile, extension:cmx, extension:ml, file:handlers/index.cmx, file:handlers/index.ml, implem, native, ocaml, quiet }
-/usr/local/bin/ocamlopt.opt -c -I handlers -o handlers/index.cmx handlers/index.ml # cached
-# Target: handler.cmx, tags: { compile, extension:cmx, extension:ml, file:handler.cmx, file:handler.ml, implem, native, ocaml, quiet }
-/usr/local/bin/ocamlopt.opt -c -I handlers -o handler.cmx handler.ml # cached
-# Target: utils.cmx, tags: { compile, extension:cmx, extension:ml, file:utils.cmx, file:utils.ml, implem, native, ocaml, quiet }
-/usr/local/bin/ocamlopt.opt -c -I handlers -o utils.cmx utils.ml # cached
-# Target: server.cmx, tags: { compile, extension:cmx, extension:ml, file:server.cmx, file:server.ml, implem, native, ocaml, quiet }
-/usr/local/bin/ocamlopt.opt -c -I handlers -o server.cmx server.ml # cached
-# Target: handlers/about.cmx, tags: { compile, extension:cmx, extension:ml, file:handlers/about.cmx, file:handlers/about.ml, implem, native, ocaml, quiet }
-/usr/local/bin/ocamlopt.opt -c -I handlers -o handlers/about.cmx handlers/about.ml
-# Target: main.cmx, tags: { compile, extension:cmx, extension:ml, file:main.cmx, file:main.ml, implem, native, ocaml, quiet }
-/usr/local/bin/ocamlopt.opt -c -I handlers -o main.cmx main.ml
-# Target: main.native, tags: { dont_link_with, extension:native, file:main.native, link, native, ocaml, program, quiet }
-/usr/local/bin/ocamlopt.opt unix.cmxa str.cmxa handler.cmx handlers/about.cmx handlers/index.cmx utils.cmx server.cmx main.cmx -o main.native
+# Target: examples/blog/main.ml.depends, tags: { extension:ml, file:examples/blog/main.ml, ocaml, ocamldep, quiet }
+/usr/local/bin/ocamldep.opt -modules examples/blog/main.ml > examples/blog/main.ml.depends # cached
+# Target: examples/blog/handlers/about.ml.depends, tags: { extension:ml, file:examples/blog/handlers/about.ml, ocaml, ocamldep, quiet }
+/usr/local/bin/ocamldep.opt -modules examples/blog/handlers/about.ml > examples/blog/handlers/about.ml.depends
+# Target: src/utils.ml.depends, tags: { extension:ml, file:src/utils.ml, ocaml, ocamldep, quiet }
+/usr/local/bin/ocamldep.opt -modules src/utils.ml > src/utils.ml.depends # cached
+# Target: src/utils.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:src/utils.cmo, file:src/utils.ml, implem, ocaml, quiet }
+/usr/local/bin/ocamlc.opt -c -I src -I examples/blog/handlers -o src/utils.cmo src/utils.ml # cached
+# Target: examples/blog/handlers/index.ml.depends, tags: { extension:ml, file:examples/blog/handlers/index.ml, ocaml, ocamldep, quiet }
+/usr/local/bin/ocamldep.opt -modules examples/blog/handlers/index.ml > examples/blog/handlers/index.ml.depends # cached
+# Target: examples/blog/handlers/index.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:examples/blog/handlers/index.cmo, file:examples/blog/handlers/index.ml, implem, ocaml, quiet }
+/usr/local/bin/ocamlc.opt -c -I examples/blog/handlers -I src -o examples/blog/handlers/index.cmo examples/blog/handlers/index.ml # cached
+# Target: src/server.ml.depends, tags: { extension:ml, file:src/server.ml, ocaml, ocamldep, quiet }
+/usr/local/bin/ocamldep.opt -modules src/server.ml > src/server.ml.depends # cached
+# Target: src/handler.ml.depends, tags: { extension:ml, file:src/handler.ml, ocaml, ocamldep, quiet }
+/usr/local/bin/ocamldep.opt -modules src/handler.ml > src/handler.ml.depends # cached
+# Target: src/handler.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:src/handler.cmo, file:src/handler.ml, implem, ocaml, quiet }
+/usr/local/bin/ocamlc.opt -c -I src -I examples/blog/handlers -o src/handler.cmo src/handler.ml # cached
+# Target: src/server.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:src/server.cmo, file:src/server.ml, implem, ocaml, quiet }
+/usr/local/bin/ocamlc.opt -c -I src -I examples/blog/handlers -o src/server.cmo src/server.ml # cached
+# Target: examples/blog/handlers/about.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:examples/blog/handlers/about.cmo, file:examples/blog/handlers/about.ml, implem, ocaml, quiet }
+/usr/local/bin/ocamlc.opt -c -I examples/blog/handlers -I src -o examples/blog/handlers/about.cmo examples/blog/handlers/about.ml
+# Target: examples/blog/main.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:examples/blog/main.cmo, file:examples/blog/main.ml, implem, ocaml, quiet }
+/usr/local/bin/ocamlc.opt -c -I examples/blog -I src -I examples/blog/handlers -o examples/blog/main.cmo examples/blog/main.ml
+# Target: src/utils.cmx, tags: { compile, extension:cmx, extension:ml, file:src/utils.cmx, file:src/utils.ml, implem, native, ocaml, quiet }
+/usr/local/bin/ocamlopt.opt -c -I src -I examples/blog/handlers -o src/utils.cmx src/utils.ml
+# Target: src/handler.cmx, tags: { compile, extension:cmx, extension:ml, file:src/handler.cmx, file:src/handler.ml, implem, native, ocaml, quiet }
+/usr/local/bin/ocamlopt.opt -c -I src -I examples/blog/handlers -o src/handler.cmx src/handler.ml
+# Target: examples/blog/handlers/about.cmx, tags: { compile, extension:cmx, extension:ml, file:examples/blog/handlers/about.cmx, file:examples/blog/handlers/about.ml, implem, native, ocaml, quiet }
+/usr/local/bin/ocamlopt.opt -c -I examples/blog/handlers -I src -o examples/blog/handlers/about.cmx examples/blog/handlers/about.ml
+# Target: examples/blog/handlers/index.cmx, tags: { compile, extension:cmx, extension:ml, file:examples/blog/handlers/index.cmx, file:examples/blog/handlers/index.ml, implem, native, ocaml, quiet }
+/usr/local/bin/ocamlopt.opt -c -I examples/blog/handlers -I src -o examples/blog/handlers/index.cmx examples/blog/handlers/index.ml
+# Target: src/server.cmx, tags: { compile, extension:cmx, extension:ml, file:src/server.cmx, file:src/server.ml, implem, native, ocaml, quiet }
+/usr/local/bin/ocamlopt.opt -c -I src -I examples/blog/handlers -o src/server.cmx src/server.ml
++ /usr/local/bin/ocamlopt.opt -c -I src -I examples/blog/handlers -o src/server.cmx src/server.ml
+File "src/server.ml", line 52, characters 20-24:
+Warning 16: this optional argument cannot be erased.
+# Target: examples/blog/main.cmx, tags: { compile, extension:cmx, extension:ml, file:examples/blog/main.cmx, file:examples/blog/main.ml, implem, native, ocaml, quiet }
+/usr/local/bin/ocamlopt.opt -c -I examples/blog -I src -I examples/blog/handlers -o examples/blog/main.cmx examples/blog/main.ml
+# Target: examples/blog/main.native, tags: { dont_link_with, extension:native, file:examples/blog/main.native, link, native, ocaml, program, quiet }
+/usr/local/bin/ocamlopt.opt unix.cmxa str.cmxa src/utils.cmx examples/blog/handlers/about.cmx examples/blog/handlers/index.cmx src/handler.cmx src/server.cmx examples/blog/main.cmx -o examples/blog/main.native
 # Compilation successful.
