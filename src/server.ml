@@ -18,8 +18,14 @@ module Server = struct
         let len = String.length str in
         let _ = Unix.write sock str 0 len in ()
 
-    let get_request sock =
-        Request.create_from_literal (read_from_sock sock)
+    type r = EmptyRequest | ValidRequest of Request.t
+
+    let get_request sock : r =
+        let sock_contents = read_from_sock sock in
+        if String.length sock_contents <> 0
+        then ValidRequest (Request.create_from_literal sock_contents)
+        else EmptyRequest
+
 
     let rec get_response (request: Request.t) (handlers: Handler.t list) =
         match handlers with
@@ -37,13 +43,14 @@ module Server = struct
 
     let rec do_listen listen_sock handlers child_procs =
         let (client_sock, _) = accept listen_sock in
-        let request = get_request client_sock in
-        match fork () with
+        match get_request client_sock with
+        | EmptyRequest -> do_listen_helper client_sock listen_sock handlers child_procs
+        | ValidRequest request -> (match fork () with
         | 0 -> validate client_sock (get_response request handlers); exit 0
         | _ -> (if child_procs > max_child_procs
             then let _ = wait () in
             do_listen_helper client_sock listen_sock handlers (child_procs - 1)
-            else do_listen_helper client_sock listen_sock handlers (child_procs + 1));
+            else do_listen_helper client_sock listen_sock handlers (child_procs + 1)));
         ()
 
     and do_listen_helper client_sock listen_sock handlers child_procs =
@@ -57,11 +64,11 @@ module Server = struct
                 bind listen_sock (ADDR_INET (inet_addr_of_string address, port));
                 listen listen_sock 8;
                 do_listen listen_sock handlers 0
-
-            initializer Printf.printf "Starting OWebl server at %s:%d\n" address port;
         end
 
-    let create address port handlers = new server address port handlers
+    let create address port handlers =
+        Printf.printf "Starting OWebl server at %s:%d\n" address port;
+        new server address port handlers
 end
 
 module SimpleServer = struct
@@ -70,5 +77,5 @@ module SimpleServer = struct
     let default_port = 9090
     let default_address = "127.0.0.1"
 
-    let create handlers = new server default_address default_port handlers
+    let create handlers = Server.create default_address default_port handlers
 end

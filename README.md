@@ -1,4 +1,24 @@
 # OWebl
-### An OCaml Web Server
+### A Modern Web Server
 
-This is a very basic web server I wrote to learn the basics of Unix sockets. I plan to continue extending it as time goes on.
+# Simple Server Example
+
+    let index_handler =
+        Handler.create
+            (StaticRouteRule.create "/" [Verb.POST; Verb.GET])
+            (FileResponse.create
+                 ~template_dir:(FileResponse.TemplateDir "examples/simple_server/templates")
+                 ~static_file:(FileResponse.StaticFile "/index.html")
+                 ());;
+
+    let hello_world_handler =
+        Handler.create
+            (StaticRouteRule.create "/hello" [Verb.GET])
+            (SimpleResponse.create "Hello World!");;
+
+    let server = SimpleServer.create [index_handler; hello_world_handler];;
+
+## Build
+
+    $ ocamlbuild -libs unix,str -Is src examples/simple_server/main.native
+    $ ./main.native

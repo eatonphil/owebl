@@ -45,20 +45,28 @@ module FileResponse = struct
 
     include Response
 
-    type s = NoStatic | Static of string
+    type f = NoStaticFile | StaticFile of string
+    type d = DefaultTemplateDir | TemplateDir of string
 
-    class file_response (static_file: s) =
+    let default_template_dir = "templates"
+
+    class file_response (template_dir: d) (static_file: f) =
         object
             method get_response (request: Request.t) : r =
                 let file_name = (match static_file with
-                | NoStatic -> request#get_uri
-                | Static file -> file) in
-                let file_string =
-                    Utils.read_file_to_string ("templates" ^ file_name) in
-                    SimpleResponse.simple_http_response file_string
+                | NoStaticFile -> request#get_uri
+                | StaticFile file -> file) in
+                let dir =
+                    (match template_dir with
+                    | DefaultTemplateDir -> default_template_dir
+                    | TemplateDir custom_dir -> custom_dir) in
+                    let file_string =
+                        Utils.read_file_to_string (dir ^ file_name) in
+                        SimpleResponse.simple_http_response file_string
         end
 
-    let create ?(static_file: s = NoStatic) () = new file_response static_file
+    let create ?(template_dir: d = DefaultTemplateDir) ?(static_file: f = NoStaticFile) () =
+        new file_response template_dir static_file 
 end
 
 module TemplateResponse = struct
