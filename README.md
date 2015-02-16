@@ -30,6 +30,12 @@ $ ocamlbuild -libs unix,str -Is src examples/simple_server/main.native
 $ ./main.native
 ```
 
+Alternatively, use make:
+
+```
+make simpleserver
+```
+
 Features
 --------
 
