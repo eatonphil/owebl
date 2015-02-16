@@ -1,4 +1,4 @@
-# OWebl - A Modern Web Server
+# OWebl - A Simple Web Framework
 
 ## Example
 
