@@ -1,7 +1,7 @@
 # OWebl
 ### A Modern Web Server
 
-# Simple Server Example
+## Simple Server Example
 
     let index_handler =
         Handler.create
@@ -18,7 +18,7 @@
 
     let server = SimpleServer.create [index_handler; hello_world_handler];;
 
-## Build
+### Build
 
     $ ocamlbuild -libs unix,str -Is src examples/simple_server/main.native
     $ ./main.native
