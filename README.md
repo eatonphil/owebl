@@ -23,7 +23,7 @@ let hello_world_handler =
 let server = SimpleServer.create [index_handler; hello_world_handler];;
 ```
 
-To build:
+To build the example server:
 
 ```
 $ ocamlbuild -libs unix,str -Is src examples/simple_server/main.native
