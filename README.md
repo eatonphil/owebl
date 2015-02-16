@@ -3,6 +3,13 @@
 
 ## Simple Server Example
 
+    open Handler
+    open Verb
+    open Response
+    open Request
+    open Rule
+    open Server
+
     let index_handler =
         Handler.create
             (StaticRouteRule.create "/" [Verb.POST; Verb.GET])
