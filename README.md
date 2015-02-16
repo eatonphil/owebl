@@ -1,7 +1,7 @@
 # OWebl
 ### A Modern Web Server
 
-## Simple Server Example
+## Example
 
     open Handler
     open Verb
