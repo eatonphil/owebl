@@ -1,6 +1,11 @@
-# OWebl - A Simple Web Framework
+OWebl
+====
 
-## Example
+OWebl is a simple web framework for OCaml. While other frameworks do exist
+for writing web applications in OCaml (ocsigen, js_of_caml), these are
+massive and difficult to maneuver.
+
+Look at how easy it is to use:
 
 ```ocaml
 open Handler
@@ -10,14 +15,6 @@ open Request
 open Rule
 open Server
 
-let index_handler =
-    Handler.create
-        (StaticRouteRule.create "/" [Verb.POST; Verb.GET])
-        (FileResponse.create
-             ~template_dir:(FileResponse.TemplateDir "examples/simple_server/templates")
-             ~static_file:(FileResponse.StaticFile "/index.html")
-             ());;
-
 let hello_world_handler =
     Handler.create
         (StaticRouteRule.create "/hello" [Verb.GET])
@@ -26,7 +23,44 @@ let hello_world_handler =
 let server = SimpleServer.create [index_handler; hello_world_handler];;
 ```
 
-### Build
+To build the example server:
 
-    $ ocamlbuild -libs unix,str -Is src examples/simple_server/main.native
-    $ ./main.native
+```
+$ ocamlbuild -libs unix,str -Is src examples/simple_server/main.native
+$ ./main.native
+```
+
+Features
+--------
+
+- Be awesome
+- Make things faster
+
+Installation
+------------
+
+Install OWebl by running:
+
+    git clone https://github.com/eatonphil/owebl
+
+To build, simply include Unix and Str modules and reference the path
+to owebl/src in your ocamlbuild line:
+
+    ocamlbuild -libs unix,str -Is path/to/owebl/src my_server.native
+
+Contribute
+----------
+
+- Issue Tracker: github.com/eatonphil/owebl/issues
+- Source Code: github.com/eatonphil/owebl
+
+Support
+-------
+
+If you are having issues, please let us know.
+Email me at me@eatonphil.com
+
+License
+-------
+
+The project is licensed under the BSD license.
