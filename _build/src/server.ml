@@ -1,75 +1,74 @@
-open Unix
-open Utils
-open Handler
+module Server = struct
+    open Unix
+    open Response
+    open Request
+    open Handler
 
-let listen_sock = socket PF_INET SOCK_STREAM 0
+    let listen_sock = socket PF_INET SOCK_STREAM 0
 
-let read_from_sock socket = 
-    let buffer = String.create 512 in
-    let rec read_all request buffer =
-        let r = Unix.read socket buffer 0 512 in
-        if r < 512 then request ^ buffer
-        else read_all (request^buffer) buffer in
-    read_all "" buffer
+    let read_from_sock socket =
+        let buffer = Bytes.create 512 in
+        let rec read_all request buffer =
+            let r = Unix.read socket buffer 0 512 in
+            if r < 512 then request ^ buffer
+            else read_all (request ^ buffer) buffer in
+        read_all "" buffer
 
-let write_to_sock sock str =
-    let len = String.length str in
-    let _ = Unix.write sock str 0 len in ()
+    let write_to_sock sock str =
+        let len = String.length str in
+        let _ = Unix.write sock str 0 len in ()
 
-let get_uri request =
-    let uri_start = (String.index request ' ') + 1 in
-    let uri_length = (String.index (String.sub request uri_start ((String.length request) - uri_start)) ' ') in
-    ((String.sub request 0 (uri_start-1)), (String.sub request uri_start uri_length))
+    let get_request sock =
+        Request.create_from_literal (read_from_sock sock)
 
-let get_request sock =
-    get_uri (read_from_sock sock)
+    let rec get_response (request: Request.t) (handlers: Handler.t list) =
+        match handlers with
+        | [] -> Response.Empty
+        | (handler :: rest) -> (match handler#get_response request with
+            | Response.Empty -> get_response request rest
+            | Response.ValidResponse valid_response -> Response.ValidResponse valid_response)
 
-let send_header sock =
-    write_to_sock sock "HTTP/1.1 200 OK\nContent-type: text/html\n"
+    let validate client_sock response =
+        match response with
+        | Response.Empty -> ()
+        | Response.ValidResponse valid_response -> write_to_sock client_sock valid_response
 
-let send_content sock str =
-    let len = String.length str in
-    let content = "Content-Length: " ^ string_of_int len ^ "\n\n" ^ str in
-    write_to_sock sock content
+    let max_child_procs = 100
 
-let send_response handler client_sock request_uri request_method =
-    send_header client_sock;
-    send_content client_sock (handler#get_callback request_uri request_method)
+    let rec do_listen listen_sock handlers child_procs =
+        let (client_sock, _) = accept listen_sock in
+        let request = get_request client_sock in
+        match fork () with
+        | 0 -> validate client_sock (get_response request handlers); exit 0
+        | _ -> (if child_procs > max_child_procs
+            then let _ = wait () in
+            do_listen_helper client_sock listen_sock handlers (child_procs - 1)
+            else do_listen_helper client_sock listen_sock handlers (child_procs + 1));
+        ()
 
-let rec select_handler (handlers : handler list) request_uri request_method =
-    if List.exists (fun h -> h#matches request_uri request_method) handlers
-    then let the_h = List.find (fun h -> h#matches request_uri request_method) handlers in the_h
-    else select_handler handlers "404" "GET"
+    and do_listen_helper client_sock listen_sock handlers child_procs =
+        close client_sock;
+        do_listen listen_sock handlers child_procs;
+        ()
 
-let rec do_listen handlers =
-    let (client_sock, _) = accept listen_sock in
-    let (request_method, request_uri) = get_request client_sock in
-    let handler = select_handler handlers request_uri request_method in
-    send_response handler client_sock request_uri request_method;
-    close client_sock;
-    do_listen handlers
+    class server address port handlers =
+        object
+            method serve =
+                bind listen_sock (ADDR_INET (inet_addr_of_string address, port));
+                listen listen_sock 8;
+                do_listen listen_sock handlers 0
 
-class server ?addr ?port =
-    object(self)
+            initializer Printf.printf "Starting OWebl server at %s:%d\n" address port;
+        end
 
-        val mutable handlers =
-            let _404_error = new handler "404" (fun request_uri -> (fun request_method -> "<h1>404 Error - Page Not Found.")) ["GET"] in [_404_error]
+    let create address port handlers = new server address port handlers
+end
 
-        method get_port = match port with
-            | None -> 9090
-            | Some p -> p
+module SimpleServer = struct
+    include Server
 
-        method get_addr = match addr with
-            | None -> "0.0.0.0"
-            | Some a -> a
+    let default_port = 9090
+    let default_address = "127.0.0.1"
 
-        method register_handler rule callback methods =
-            let new_handler = new handler rule callback methods in
-            handlers <- new_handler :: handlers
-            
-        method start =
-            bind listen_sock (ADDR_INET (inet_addr_of_string self#get_addr, self#get_port));
-            print_s ("Starting server at " ^ self#get_addr ^ ":" ^ (string_of_int self#get_port) ^ "...");
-            listen listen_sock 8;
-            let _ = do_listen handlers in ()
-    end
+    let create handlers = new server default_address default_port handlers
+end

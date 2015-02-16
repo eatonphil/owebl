@@ -1,0 +1,73 @@
+module Response = struct
+    open String
+    open Printf
+    open Request
+
+    type r =
+        | Empty
+        | ValidResponse of string
+
+    type t = < get_response: Request.t -> r >
+
+    let http_response (initial_response: string) (response_code: string)
+    (content_type: string) (content_charset: string) (headers: string list) =
+        ValidResponse (Printf.sprintf "HTTP/1.1 %s\nContent-Type: %s;\
+        charset=%s\nContent-Length: %d\n\n%s" response_code content_type
+        content_charset (String.length initial_response) initial_response)
+
+    class virtual response =
+        object
+            method virtual get_response : Request.t -> r
+        end
+end
+
+module SimpleResponse = struct
+    open Request
+
+    include Response
+
+    let simple_http_response (initial_response: string) : Response.r =
+        http_response initial_response "200 OK" "text/html" "utf-8" []
+
+
+    class simple_response (string_response: string) =
+        object
+            method get_response (request: Request.t) : r =
+                simple_http_response string_response
+        end
+
+    let create (string_response: string) = new simple_response string_response
+end
+
+module FileResponse = struct
+    open Utils
+    open Request
+
+    include Response
+
+    type s = NoStatic | Static of string
+
+    class file_response (static_file: s) =
+        object
+            method get_response (request: Request.t) : r =
+                let file_name = (match static_file with
+                | NoStatic -> request#get_uri
+                | Static file -> file) in
+                let file_string =
+                    Utils.read_file_to_string ("templates" ^ file_name) in
+                    SimpleResponse.simple_http_response file_string
+        end
+
+    let create ?(static_file: s = NoStatic) () = new file_response static_file
+end
+
+module TemplateResponse = struct
+    open Request
+
+    include Response
+
+    class template_response = 
+        object
+        end
+    (* TODO *)
+end

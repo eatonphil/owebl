@@ -1,9 +1,17 @@
-class handler rule (callback : string -> string -> string) (methods : string list) =
-    object(self)
-        method matches test_string test_method =
-            let r = Str.regexp rule in
-            match Str.string_match r test_string 0 with
-            | false -> false
-            | true -> List.exists (fun nth_method -> nth_method = test_method) methods
-        method get_callback = callback
-    end
+module Handler = struct
+    open Rule
+    open Response
+    open Request
+
+    type t = < get_response: Request.t -> Response.r >
+
+    class handler (rule: RouteRule.t) (response: Response.t) =
+        object(self)
+            method get_response (request: Request.t) : Response.r =
+                match rule#matches request with
+                | RouteRule.Match -> response#get_response request
+                | RouteRule.NoMatch -> Response.Empty
+        end
+
+    let create (rule: RouteRule.t) (response: Response.t) = new handler rule response
+end
