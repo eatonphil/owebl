@@ -4,10 +4,15 @@ module RouteRule = struct
 
     type m = Match | NoMatch
 
-    type t = < matches: Request.t -> m >
+    type t = < verb_matches: Verb.t -> m; matches: Request.t -> m >
 
     class virtual rule (uri: string) (verbs: Verb.t list) =
         object
+            method verb_matches (verb: Verb.t) : m =
+                match List.exists (fun nth_verb -> nth_verb = verb) verbs with
+                | true -> Match
+                | false -> NoMatch
+
             method virtual matches : Request.t -> m
         end
 end
@@ -20,14 +25,34 @@ module StaticRouteRule = struct
 
     class static_rule (uri: string) (verbs: Verb.t list) =
         object
-            inherit rule uri verbs
+            inherit rule uri verbs as super
 
-            method matches (request: Request.t) = match (uri = request#get_uri) with
-            | true -> (match List.exists (fun nth_verb -> nth_verb = request#get_verb) verbs with
-                | true -> Match
-                | false -> NoMatch)
-            | false -> NoMatch
+            method matches (request: Request.t) : m =
+                match (uri = request#get_uri) with
+                | true -> super#verb_matches request#get_verb
+                | false -> NoMatch
         end
 
     let create (uri: string) (verbs: Verb.t list) = new static_rule uri verbs
+end
+
+module RegexRouteRule = struct
+    open Verb
+    open Request
+
+    include RouteRule
+
+    class regex_rule (uri: string) (verbs: Verb.t list) =
+        object
+            inherit rule uri verbs as super
+
+            val re = Str.regexp uri
+
+            method matches (request: Request.t) : m =
+                match (Str.string_match re request#get_uri 0) with
+                | true -> super#verb_matches request#get_verb
+                | false -> NoMatch
+        end
+
+    let create (uri: string) (verbs: Verb.t list) = new regex_rule uri verbs
 end
