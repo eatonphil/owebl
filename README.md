@@ -1,5 +1,4 @@
-# OWebl
-### A Modern Web Server
+# OWebl - A Modern Web Server
 
 ## Example
 
