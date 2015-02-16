@@ -39,8 +39,8 @@ make simpleserver
 Features
 --------
 
-- Be awesome
-- Make things faster
+- Simple interface
+- Multiple concurrent requests via forking
 
 Installation
 ------------
@@ -53,6 +53,8 @@ To build, simply include Unix and Str modules and reference the path
 to owebl/src in your ocamlbuild line:
 
     ocamlbuild -libs unix,str -Is path/to/owebl/src my_server.native
+
+Or edit included makefile entry for `simpleserver` to your needs.
 
 Contribute
 ----------
