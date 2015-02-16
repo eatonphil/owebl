@@ -33,7 +33,7 @@ $ ./main.native
 Alternatively, use make:
 
 ```
-make simpleserver
+$ make simpleserver
 ```
 
 Features
@@ -47,12 +47,12 @@ Installation
 
 Install OWebl by running:
 
-    git clone https://github.com/eatonphil/owebl
+    $ git clone https://github.com/eatonphil/owebl
 
 To build, simply include Unix and Str modules and reference the path
 to owebl/src in your ocamlbuild line:
 
-    ocamlbuild -libs unix,str -Is path/to/owebl/src my_server.native
+    $ ocamlbuild -libs unix,str -Is path/to/owebl/src my_server.native
 
 Or edit included makefile entry for `simpleserver` to your needs.
 
