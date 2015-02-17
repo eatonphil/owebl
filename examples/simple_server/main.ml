@@ -1,7 +1,4 @@
-open Handler
-open Verb
 open Response
-open Request
 open Rule
 open Server
 

@@ -1,10 +1,7 @@
-module Server = struct
-    open Unix
+module Server = struct    
     open Response
-    open Request
-    open Handler
 
-    let listen_sock = socket PF_INET SOCK_STREAM 0
+    let listen_sock = Unix.socket Unix.PF_INET Unix.SOCK_STREAM 0
 
     let read_from_sock socket =
         let buffer = Bytes.create 512 in
@@ -42,27 +39,29 @@ module Server = struct
     let max_child_procs = 100
 
     let rec do_listen listen_sock handlers child_procs =
-        let (client_sock, _) = accept listen_sock in
+        let (client_sock, _) = Unix.accept listen_sock in
         match get_request client_sock with
         | EmptyRequest -> do_listen_helper client_sock listen_sock handlers child_procs
-        | ValidRequest request -> (match fork () with
+        | ValidRequest request -> (match Unix.fork () with
         | 0 -> validate client_sock (get_response request handlers); exit 0
         | _ -> (if child_procs > max_child_procs
-            then let _ = wait () in
+            then let _ = Unix.wait () in
             do_listen_helper client_sock listen_sock handlers (child_procs - 1)
             else do_listen_helper client_sock listen_sock handlers (child_procs + 1)));
         ()
 
     and do_listen_helper client_sock listen_sock handlers child_procs =
-        close client_sock;
+        Unix.close client_sock;
         do_listen listen_sock handlers child_procs;
         ()
 
     class server address port handlers =
         object
             method serve =
-                bind listen_sock (ADDR_INET (inet_addr_of_string address, port));
-                listen listen_sock 8;
+                let addr_inet =
+                    (Unix.ADDR_INET (Unix.inet_addr_of_string address, port)) in
+                Unix.bind listen_sock addr_inet;
+                Unix.listen listen_sock 8;
                 do_listen listen_sock handlers 0
         end
 

@@ -1,7 +1,4 @@
 module RouteRule = struct
-    open Verb
-    open Request
-
     type m = Match | NoMatch
 
     type t = < verb_matches: Verb.t -> m; matches: Request.t -> m >
@@ -18,9 +15,6 @@ module RouteRule = struct
 end
 
 module StaticRouteRule = struct
-    open Verb
-    open Request
-
     include RouteRule
 
     class static_rule (uri: string) (verbs: Verb.t list) =
@@ -37,9 +31,6 @@ module StaticRouteRule = struct
 end
 
 module RegexRouteRule = struct
-    open Verb
-    open Request
-
     include RouteRule
 
     class regex_rule (uri: string) (verbs: Verb.t list) =

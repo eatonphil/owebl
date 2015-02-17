@@ -1,8 +1,4 @@
 module Response = struct
-    open String
-    open Printf
-    open Request
-
     type r =
         | Empty
         | ValidResponse of string
@@ -22,8 +18,6 @@ module Response = struct
 end
 
 module SimpleResponse = struct
-    open Request
-
     include Response
 
     let simple_http_response (initial_response: string) : Response.r =
@@ -40,9 +34,6 @@ module SimpleResponse = struct
 end
 
 module FileResponse = struct
-    open Utils
-    open Request
-
     include Response
 
     type f = NoStaticFile | StaticFile of string
@@ -70,8 +61,6 @@ module FileResponse = struct
 end
 
 module TemplateResponse = struct
-    open Request
-
     include Response
 
     class template_response = 

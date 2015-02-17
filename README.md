@@ -8,12 +8,7 @@ massive and difficult to maneuver.
 Look at how easy it is to use:
 
 ```ocaml
-open Handler
-open Verb
-open Response
-open Request
 open Rule
-open Server
 
 let hello_world_handler =
     Handler.create
@@ -21,6 +16,8 @@ let hello_world_handler =
         (SimpleResponse.create "Hello World!");;
 
 let server = SimpleServer.create [index_handler; hello_world_handler];;
+
+server#serve
 ```
 
 To build the example server:
