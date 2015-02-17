@@ -8,7 +8,8 @@ massive and difficult to maneuver.
 Look at how easy it is to use:
 
 ```ocaml
-open Rule
+open Rule (* Get access to StaticRouteRule, RegexRouteRule, etc. *)
+open Response (* Get access to SimpleResponse, TemplateResponse, etc. *)
 
 let hello_world_handler =
     Handler.create
