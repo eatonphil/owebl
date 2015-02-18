@@ -45,7 +45,7 @@ module FileResponse = struct
         object
             method get_response (request: Request.t) : r =
                 let file_name = (match static_file with
-                | NoStaticFile -> request#get_uri
+                | NoStaticFile -> request#get_path
                 | StaticFile file -> file) in
                 let dir =
                     (match template_dir with
