@@ -34,11 +34,17 @@ Alternatively, use make:
 $ make simpleserver
 ```
 
+Examples
+--------
+
+See the example directories!
+
 Features
 --------
 
 - Simple interface
 - Multiple concurrent requests via forking
+- String and function templating support
 
 Installation
 ------------
