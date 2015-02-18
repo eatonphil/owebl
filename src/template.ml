@@ -10,22 +10,22 @@ module StringMap = Map.Make(String);;
 (* Template marker. *)
 let tm = '`';;
 
-let fulfill_key (key: string) (ctx: Fulfillment.t StringMap.t) : string =
+let fulfill_key (key: string) (ctx: Fulfillment.t StringMap.t) (req: Request.t): string =
     match StringMap.find key ctx with
     | Fulfillment.Variable v -> v
-    | _ -> ""
+    | Fulfillment.Function f -> f req
 
 let fulfillment_index key value index =
     index - (String.length key) + (String.length value)
 
-let templatize (tmp: string) (ctx: Fulfillment.t StringMap.t) : string =
+let templatize (tmp: string) (ctx: Fulfillment.t StringMap.t) (req: Request.t) : string =
     let rec templatize_rec tmp i (in_tmp_key: bool) (tmp_key: string) =
         if i < (String.length tmp) then begin
             let c = tmp.[i] in match c = tm with
             | true -> begin
                 if in_tmp_key
                 then let key_fulfilled =
-                    fulfill_key tmp_key ctx in
+                    fulfill_key tmp_key ctx req in
                 let new_index =
                     fulfillment_index tmp_key key_fulfilled i in
                 let tmp_key_fulfilled =

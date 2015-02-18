@@ -66,7 +66,6 @@ module Server = struct
         end
 
     let create address port handlers =
-        Printf.printf "Starting OWebl server at %s:%d\n" address port;
         new server address port handlers
 end
 
