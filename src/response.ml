@@ -63,8 +63,15 @@ end
 module TemplateResponse = struct
     include Response
 
-    class template_response = 
+    class template_response
+        (template_dir: FileResponse.d)
+        (static_file: FileResponse.f)
+        (context: Template.Context.t) = 
         object
+            inherit FileResponse.file_response d f as super
+
+            method get_response (request: Request.t) : r =
+                let response = super#get_response request in
+                    Template.templatize response context
         end
-    (* TODO *)
 end
