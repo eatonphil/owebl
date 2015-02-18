@@ -39,6 +39,11 @@ Examples
 
 See the example directories!
 
+These are also included in the makefile and can be easily built and run:
+
+  * `make fileserver && ./main.native`
+  * `make templateserver && ./main.native`
+
 Features
 --------
 
