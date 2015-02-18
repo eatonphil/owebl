@@ -22,7 +22,7 @@ module StaticRouteRule = struct
             inherit rule uri verbs as super
 
             method matches (request: Request.t) : m =
-                match (uri = request#get_uri) with
+                match (uri = request#get_path) with
                 | true -> super#verb_matches request#get_verb
                 | false -> NoMatch
         end
@@ -40,7 +40,7 @@ module RegexRouteRule = struct
             val re = Str.regexp uri
 
             method matches (request: Request.t) : m =
-                match (Str.string_match re request#get_uri 0) with
+                match (Str.string_match re request#get_path 0) with
                 | true -> super#verb_matches request#get_verb
                 | false -> NoMatch
         end

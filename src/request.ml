@@ -1,4 +1,17 @@
-type t = < get_uri: string; get_verb: Verb.t; get_headers: string list; get_body: string>
+type t = <
+    get_uri: string;
+    get_verb: Verb.t;
+    get_headers: string list;
+    get_body: string;
+    get_path: string;
+    get_query: string
+>
+
+let substr_index s d i =
+    let spl = Str.split (Str.regexp d) s in
+    let len = Array.length (Array.of_list spl) in
+    if i >= len || i < 0 then ""
+    else List.nth (Str.split (Str.regexp d) s) i
 
 class request (uri: string) (verb: Verb.t) (headers: string list) (body: string) =
     object(self)
@@ -6,16 +19,16 @@ class request (uri: string) (verb: Verb.t) (headers: string list) (body: string)
         method get_verb = verb
         method get_headers = headers
         method get_body = body
+        
+        val path = substr_index uri "?" 0
+        val query = substr_index uri "?" 1
+
+        method get_path = path
+        method get_query = query
     end
 
 let create (uri: string) (verb: Verb.t) (headers: string list) (body: string) =
     new request uri verb headers body
-
-let substr_index s d i =
-   let spl = Str.split (Str.regexp d) s in
-   let len = Array.length (Array.of_list spl) in
-   if i >= len || i < 0 then ""
-   else List.nth (Str.split (Str.regexp d) s) i
 
 let get_verb request =
     Verb.create (substr_index request " " 0)

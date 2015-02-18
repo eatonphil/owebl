@@ -45,7 +45,7 @@ module FileResponse = struct
         object
             method get_response (request: Request.t) : r =
                 let file_name = (match static_file with
-                | NoStaticFile -> request#get_uri
+                | NoStaticFile -> request#get_path
                 | StaticFile file -> file) in
                 let dir =
                     (match template_dir with
@@ -56,15 +56,39 @@ module FileResponse = struct
                         SimpleResponse.simple_http_response file_string
         end
 
-    let create ?(template_dir: d = DefaultTemplateDir) ?(static_file: f = NoStaticFile) () =
-        new file_response template_dir static_file 
+    let create
+        ?(template_dir: d = DefaultTemplateDir)
+        ?(static_file: f = NoStaticFile)
+        () =
+            new file_response template_dir static_file 
 end
 
 module TemplateResponse = struct
+    open Template
+
     include Response
 
-    class template_response = 
+    class template_response
+        (template_dir: FileResponse.d)
+        (static_file: FileResponse.f)
+        (context: Fulfillment.t StringMap.t) = 
         object
+            inherit FileResponse.file_response template_dir static_file as super
+
+            method get_response (request: Request.t) : r =
+                let response = super#get_response request in
+                match response with
+                | Response.Empty -> Response.Empty
+                | Response.ValidResponse response -> let tmpl_resp =
+                    let response_body = Request.create_from_literal response in
+                    Template.templatize response_body#get_body context request in
+                SimpleResponse.simple_http_response tmpl_resp
         end
-    (* TODO *)
+
+    let create
+        ?(template_dir: FileResponse.d = FileResponse.DefaultTemplateDir)
+        ?(static_file: FileResponse.f = FileResponse.NoStaticFile)
+        ?(context: Fulfillment.t StringMap.t = StringMap.empty)
+        () =
+            new template_response template_dir static_file context
 end
