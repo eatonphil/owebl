@@ -1,3 +1,5 @@
+module StringMap = Map.Make(String);;
+
 module Fulfillment = struct
     type f = Request.t -> string
     type t =
@@ -5,12 +7,25 @@ module Fulfillment = struct
         | Function of f
 end
 
-module StringMap = Map.Make(String);;
+module Context = struct
+    type t = Fulfillment.t StringMap.t
+
+    let make (l: (string * Fulfillment.t) list) : t =
+        let ctx = StringMap.empty in
+        let rec make_helper l ctx =
+            match l with
+            | [] -> ctx
+            | (key, value) :: tail -> let ctx =
+                StringMap.add key value ctx in
+            make_helper tail ctx in
+        make_helper l ctx
+end
+
 
 (* Template marker. *)
 let tm = '`';;
 
-let fulfill_key (key: string) (ctx: Fulfillment.t StringMap.t) (req: Request.t): string =
+let fulfill_key (key: string) (ctx: Context.t) (req: Request.t): string =
     match StringMap.find key ctx with
     | Fulfillment.Variable v -> v
     | Fulfillment.Function f -> f req
