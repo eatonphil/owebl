@@ -1,15 +1,16 @@
 open Response
 open Rule
+open Verb
 open Server
 
-let index_handler =
+let handler =
     Handler.create
-        (RegexRouteRule.create "/[a-zA-Z]*99/" [Verb.GET])
+        (RegexRouteRule.create "/[a-zA-Z]*99/" [GET])
         (FileResponse.create
             ~template_dir:(FileResponse.TemplateDir "examples/file_server/templates")
             ~static_file:(FileResponse.StaticFile "/index.html")
             ())
 
-let server = SimpleServer.create [index_handler];;
+let server = SimpleServer.create [handler];;
 
 server#serve

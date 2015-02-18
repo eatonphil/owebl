@@ -71,7 +71,7 @@ module TemplateResponse = struct
     class template_response
         (template_dir: FileResponse.d)
         (static_file: FileResponse.f)
-        (context: Fulfillment.t StringMap.t) = 
+        (context: Context.t) = 
         object
             inherit FileResponse.file_response template_dir static_file as super
 
@@ -88,7 +88,7 @@ module TemplateResponse = struct
     let create
         ?(template_dir: FileResponse.d = FileResponse.DefaultTemplateDir)
         ?(static_file: FileResponse.f = FileResponse.NoStaticFile)
-        ?(context: Fulfillment.t StringMap.t = StringMap.empty)
+        ?(context: Context.t = Context.make [])
         () =
             new template_response template_dir static_file context
 end

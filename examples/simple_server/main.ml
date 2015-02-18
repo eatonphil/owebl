@@ -1,12 +1,13 @@
 open Response
 open Rule
+open Verb
 open Server
 
-let hello_world_handler =
+let handler =
     Handler.create
-        (StaticRouteRule.create "/hello" [Verb.GET])
+        (StaticRouteRule.create "/" [GET])
         (SimpleResponse.create "Hello World!")
 
-let server = SimpleServer.create [hello_world_handler];;
+let server = SimpleServer.create [handler];;
 
 server#serve

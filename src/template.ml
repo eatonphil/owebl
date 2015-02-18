@@ -1,16 +1,14 @@
 module StringMap = Map.Make(String);;
 
-module Fulfillment = struct
-    type f = Request.t -> string
-    type t =
-        | Variable of string
-        | Function of f
-end
-
 module Context = struct
-    type t = Fulfillment.t StringMap.t
+    type f = Request.t -> string
+    type t = m StringMap.t
+    and m =
+        | Var of string
+        | Fun of f
 
-    let make (l: (string * Fulfillment.t) list) : t =
+
+    let make (l: (string * m) list) : t =
         let ctx = StringMap.empty in
         let rec make_helper l ctx =
             match l with
@@ -27,13 +25,13 @@ let tm = '`';;
 
 let fulfill_key (key: string) (ctx: Context.t) (req: Request.t): string =
     match StringMap.find key ctx with
-    | Fulfillment.Variable v -> v
-    | Fulfillment.Function f -> f req
+    | Context.Var v -> v
+    | Context.Fun f -> f req
 
 let fulfillment_index key value index =
     index - (String.length key) + (String.length value)
 
-let templatize (tmp: string) (ctx: Fulfillment.t StringMap.t) (req: Request.t) : string =
+let templatize (tmp: string) (ctx: Context.t) (req: Request.t) : string =
     let rec templatize_rec tmp i (in_tmp_key: bool) (tmp_key: string) =
         if i < (String.length tmp) then begin
             let c = tmp.[i] in match c = tm with

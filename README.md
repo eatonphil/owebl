@@ -8,15 +8,17 @@ massive and difficult to maneuver.
 Look at how easy it is to use:
 
 ```ocaml
-open Rule (* Get access to StaticRouteRule, RegexRouteRule, etc. *)
-open Response (* Get access to SimpleResponse, TemplateResponse, etc. *)
+open Response
+open Rule
+open Verb
+open Server
 
-let hello_world_handler =
+let handler =
     Handler.create
-        (StaticRouteRule.create "/hello" [Verb.GET])
-        (SimpleResponse.create "Hello World!");;
+        (StaticRouteRule.create "/" [GET])
+        (SimpleResponse.create "Hello World!")
 
-let server = SimpleServer.create [index_handler; hello_world_handler];;
+let server = SimpleServer.create [handler];;
 
 server#serve
 ```
