@@ -12,7 +12,7 @@ let context = Context.make [
 let test =
     let _assert tmp str =
         let err = (fun a b -> Printf.printf
-            "Failed fulfilling template:\n%s\nExpected:\n%s\nGot:\n%s\n" tmp b a) in
+            "Failed fulfilling template:\n%s\nExpected:\n%s\nGot:\n%s\n\n" tmp b a) in
         Assert.test (templatize tmp context dummy_request) str err in
 
     _assert
@@ -26,6 +26,10 @@ let test =
     _assert
     "`tm_test` is the template marker."
     "` is the template marker.";
+
+    _assert
+    "\\`name\\``world`\\``tm_test`"
+    "`name`World``";
 
     _assert
     "\\`name\\``name`\\``name`"

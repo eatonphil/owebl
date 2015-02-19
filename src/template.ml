@@ -36,7 +36,7 @@ let fulfill_key (key: string) (ctx: Context.t) (req: Request.t): string =
         | Context.Fun f -> f req
     end
     else begin
-        Printf.printf "Template error: key \"%s\" not found.";
+        Printf.printf "Template error: key \"%s\" not found.\n" key;
         ""
     end
 
@@ -50,17 +50,22 @@ let templatize (tmp: string) (ctx: Context.t) (req: Request.t) : string =
             | true -> if (i > 0 && tmp.[i-1] = '\\')
             then let escaped_tmp =
                 Str.replace_first (Str.regexp ("\\\\" ^ tm_str)) tm_str tmp in
-            templatize_rec escaped_tmp i in_tmp_key tmp_key
+            templatize_rec escaped_tmp i in_tmp_key ""
             else begin
                 if in_tmp_key
-                then let key_fulfilled =
-                    fulfill_key tmp_key ctx req in
-                let new_index =
-                    fulfillment_index tmp_key key_fulfilled i in
-                let tmp_key_fulfilled =
-                    let key_regexp = Str.regexp (tm_str ^ tmp_key ^ tm_str) in
-                    Str.replace_first key_regexp key_fulfilled tmp in
-                templatize_rec tmp_key_fulfilled (new_index + 1) false ""
+                then begin
+                    let key_fulfilled =
+                        fulfill_key tmp_key ctx req in
+                    let new_index =
+                        fulfillment_index tmp_key key_fulfilled i in
+                    let tmp_key_fulfilled =
+                        let key_start = (i - String.length tmp_key - 1) in
+                        let previous = String.sub tmp 0 key_start in
+                        let current = String.sub tmp key_start (String.length tmp - key_start) in
+                        let key_regexp = Str.regexp (tm_str ^ tmp_key ^ tm_str) in
+                        previous ^ (Str.replace_first key_regexp key_fulfilled current) in
+                    templatize_rec tmp_key_fulfilled (new_index + 1) false ""
+                end 
                 else templatize_rec tmp (i + 1) true ""
             end
             | false -> templatize_rec tmp (i + 1) in_tmp_key (tmp_key ^ (String.make 1 c))
