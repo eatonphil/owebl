@@ -36,14 +36,12 @@ let fulfill_key (key: string) (ctx: Context.t) (req: Request.t): string =
         | Context.Fun f -> f req
     end
     else begin
-        Printf.printf
-        "Template error: key \"%s\" not found for request:\n%s\n"
-        key req#to_string;
+        Printf.printf "Template error: key \"%s\" not found.";
         ""
     end
 
 let fulfillment_index key value index =
-    index - (String.length key) + (String.length value)
+    index - (String.length key + 1) + abs (String.length value - String.length key)
 
 let templatize (tmp: string) (ctx: Context.t) (req: Request.t) : string =
     let rec templatize_rec tmp i (in_tmp_key: bool) (tmp_key: string) =
@@ -67,5 +65,9 @@ let templatize (tmp: string) (ctx: Context.t) (req: Request.t) : string =
             end
             | false -> templatize_rec tmp (i + 1) in_tmp_key (tmp_key ^ (String.make 1 c))
         end
-        else tmp in
+        else
+            (*if in_tmp_key then Printf.printf
+            "Missing template end marker of key for request:\n%s\n"
+            req#to_string;*)
+            tmp in
     templatize_rec tmp 0 false ""
