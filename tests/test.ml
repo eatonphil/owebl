@@ -1,1 +1,2 @@
-TemplateTest.test ()
+Templatetest.test;
+Requesttest.test

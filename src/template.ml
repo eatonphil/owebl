@@ -7,6 +7,11 @@ module Context = struct
         | Var of string
         | Fun of f
 
+    let exists (key: string) (ctx: t) : bool =
+        StringMap.exists (fun nth_key ctx -> nth_key = key) ctx
+
+    let get (key: string) (ctx: t) : m =
+        StringMap.find key ctx
 
     let make (l: (string * m) list) : t =
         let ctx = StringMap.empty in
@@ -25,9 +30,17 @@ let tm = '`'
 let tm_str = String.make 1 tm
 
 let fulfill_key (key: string) (ctx: Context.t) (req: Request.t): string =
-    match StringMap.find key ctx with
-    | Context.Var v -> v
-    | Context.Fun f -> f req
+    if (Context.exists key ctx) then begin
+        match Context.get key ctx with
+        | Context.Var v -> v
+        | Context.Fun f -> f req
+    end
+    else begin
+        Printf.printf
+        "Template error: key \"%s\" not found for request:\n%s\n"
+        key req#to_string;
+        ""
+    end
 
 let fulfillment_index key value index =
     index - (String.length key) + (String.length value)
