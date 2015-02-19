@@ -6,6 +6,8 @@ let dummy_request =
 let context = Context.make [
     ("name", Context.Var "Phil");
     ("world", Context.Var "World");
+    ("first_name", Context.Var "Joe");
+    ("last_name", Context.Var "Biden");
     ("tm_test", Context.Var "`")
 ]
 
@@ -34,5 +36,9 @@ let test =
     _assert
     "\\`name\\``name`\\``name`"
     "`name`Phil`Phil";
+
+    _assert
+    "`last_name`, `first_name` is me."
+    "Biden, Joe is me.";
 
     ()

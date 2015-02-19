@@ -41,7 +41,7 @@ let fulfill_key (key: string) (ctx: Context.t) (req: Request.t): string =
     end
 
 let fulfillment_index key value index =
-    index - (String.length key + 1) + abs (String.length value - String.length key)
+    index - (String.length key + 2) + String.length value
 
 let templatize (tmp: string) (ctx: Context.t) (req: Request.t) : string =
     let rec templatize_rec tmp i (in_tmp_key: bool) (tmp_key: string) =
@@ -50,7 +50,7 @@ let templatize (tmp: string) (ctx: Context.t) (req: Request.t) : string =
             | true -> if (i > 0 && tmp.[i-1] = '\\')
             then let escaped_tmp =
                 Str.replace_first (Str.regexp ("\\\\" ^ tm_str)) tm_str tmp in
-            templatize_rec escaped_tmp i in_tmp_key ""
+            templatize_rec escaped_tmp i in_tmp_key tmp_key
             else begin
                 if in_tmp_key
                 then begin
@@ -64,11 +64,15 @@ let templatize (tmp: string) (ctx: Context.t) (req: Request.t) : string =
                         let current = String.sub tmp key_start (String.length tmp - key_start) in
                         let key_regexp = Str.regexp (tm_str ^ tmp_key ^ tm_str) in
                         previous ^ (Str.replace_first key_regexp key_fulfilled current) in
-                    templatize_rec tmp_key_fulfilled (new_index + 1) false ""
+                    templatize_rec tmp_key_fulfilled (new_index+1) false ""
                 end 
                 else templatize_rec tmp (i + 1) true ""
             end
-            | false -> templatize_rec tmp (i + 1) in_tmp_key (tmp_key ^ (String.make 1 c))
+            | false -> match in_tmp_key with
+                | true ->
+                    templatize_rec tmp (i + 1) true (tmp_key ^ (String.make 1 c))
+                | false -> 
+                    templatize_rec tmp (i + 1) false ""
         end
         else
             (*if in_tmp_key then Printf.printf
