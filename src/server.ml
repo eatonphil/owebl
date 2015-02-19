@@ -42,12 +42,17 @@ module Server = struct
         let (client_sock, _) = Unix.accept listen_sock in
         match get_request client_sock with
         | EmptyRequest -> do_listen_helper client_sock listen_sock handlers child_procs
-        | ValidRequest request -> (match Unix.fork () with
-        | 0 -> validate client_sock (get_response request handlers); exit 0
-        | _ -> (if child_procs > max_child_procs
-            then let _ = Unix.wait () in
-            do_listen_helper client_sock listen_sock handlers (child_procs - 1)
-            else do_listen_helper client_sock listen_sock handlers (child_procs + 1)));
+        | ValidRequest request -> begin
+            Printf.printf "%s:\n%s\n" Utils.timestamp request#to_string;
+            match Unix.fork () with
+            | 0 -> validate client_sock (get_response request handlers); exit 0
+            | _ -> begin
+                if child_procs > max_child_procs
+                then let _ = Unix.wait () in
+                do_listen_helper client_sock listen_sock handlers (child_procs - 1)
+                else do_listen_helper client_sock listen_sock handlers (child_procs + 1)
+            end
+        end;
         ()
 
     and do_listen_helper client_sock listen_sock handlers child_procs =

@@ -19,5 +19,8 @@ TS = examples/template_server/main
 templateserver: $(DEPS)/*.ml $(TS).ml
 	ocamlbuild $(LFLAGS) $(CFLAGS) $(TS).native
 
+test: $(DEPS)/*.ml tests/*.ml
+	ocamlbuild $(LFLAGS) $(CFLAGS),tests tests/test.native
+
 clean:
 	rm -rf _build *.native *.byte

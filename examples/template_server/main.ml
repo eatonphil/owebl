@@ -5,7 +5,8 @@ open Server
 open Verb
 
 let context = Context.make [
-    ("name", Context.Var "Phil");
+    ("first_name", Context.Var "Phil");
+    ("last_name", Context.Var " Eaton");
     ("uri()", Context.Fun (fun (req: Request.t) -> req#get_uri))
 ]
 
