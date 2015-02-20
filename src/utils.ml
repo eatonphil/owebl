@@ -1,5 +1,3 @@
-open Unix
-
 let substr_index (str: string) (delimiter: string) (index: int) =
     let split = Str.split (Str.regexp delimiter) str in
     let length = Array.length (Array.of_list split) in
@@ -19,6 +17,8 @@ let read_file filename =
   		List.rev !lines
 
 let read_file_to_string filename = String.concat "\n" (read_file filename)
+
+open Unix
 
 let timestamp : string =
     let t : tm = localtime (time ()) in

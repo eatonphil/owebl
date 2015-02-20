@@ -47,7 +47,7 @@ let get_uri request =
     Utils.substr_index request " " 1
 
 let get_version request =
-    Utils.substr_index request " " 2
+    Utils.substr_index (Utils.substr_index request " " 2) "\n" 0
 
 let get_headers request =
     let lines = Array.of_list (Str.split (Str.regexp "\n") request) in
@@ -59,7 +59,8 @@ let get_headers request =
         | (header :: rest) -> if header = ""
         then headers
         else retain_headers (header :: headers) rest) in
-    retain_headers [] (Array.to_list headers_with_body)
+    let h = retain_headers [] (Array.to_list headers_with_body) in
+    List.rev h
     else []
 
 let get_body request =
