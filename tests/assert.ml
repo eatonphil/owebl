@@ -1,4 +1,3 @@
-type 'a ref = { mutable contents : 'a }
 let total = ref 0
 let passed = ref 0
 
