@@ -18,15 +18,29 @@ let read_file filename =
 
 let read_file_to_string filename = String.concat "\n" (read_file filename)
 
-open Unix
+let pad_int i l p prepend =
+    let s = string_of_int i in begin
+        if (String.length s) < l
+        then begin
+            let rec pad s =
+                match String.length s = l with
+                | true -> s
+                | false -> if prepend
+                then pad (p ^ s)
+                else pad (s ^ p) in
+            pad s
+        end
+        else s
+    end
 
+open Unix
 let timestamp : string =
     let t : tm = localtime (time ()) in
     (* 2015/02/17 21:19:50 *)
-    Printf.sprintf "%d/%d/%d %d:%d:%d"
-    t.tm_year
-    t.tm_mon
-    t.tm_mday
-    t.tm_hour
-    t.tm_min
-    t.tm_sec
+    Printf.sprintf "%d/%s/%s %s:%s:%s"
+    (t.tm_year + 1900)
+    (pad_int t.tm_mon 2 "0" true)
+    (pad_int t.tm_mday 2 "0" true)
+    (pad_int t.tm_hour 2 "0" true)
+    (pad_int t.tm_min 2 "0" true)
+    (pad_int t.tm_sec 2 "0" true)

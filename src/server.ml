@@ -43,7 +43,7 @@ module Server = struct
         match get_request client_sock with
         | EmptyRequest -> do_listen_helper client_sock listen_sock handlers child_procs
         | ValidRequest request -> begin
-            Printf.printf "%s:\n%s\n" Utils.timestamp request#to_string;
+            Printf.printf "%s\n%s\n" Utils.timestamp request#to_string;
             match Unix.fork () with
             | 0 -> validate client_sock (get_response request handlers); exit 0
             | _ -> begin
@@ -81,4 +81,8 @@ module SimpleServer = struct
     let default_address = "127.0.0.1"
 
     let create handlers = Server.create default_address default_port handlers
+    let serve handlers =
+        let server = create handlers in
+        server#serve;
+        server
 end
