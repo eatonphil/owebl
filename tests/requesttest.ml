@@ -12,7 +12,7 @@ home=Cosby&favorite+flavor=flies";;
 
 let test =
     let _assert req =
-        let err = (fun a b -> Printf.printf
+        let err = (fun a b -> Printf.eprintf
         "Failed converting request to string:\n%s\nGot:\n%s\n\n" a b) in
     Assert.test req (Request.create_from_literal req)#to_string err in
 

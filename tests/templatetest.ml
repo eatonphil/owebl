@@ -13,7 +13,7 @@ let context = Context.make [
 
 let test =
     let _assert tmp str =
-        let err = (fun a b -> Printf.printf
+        let err = (fun a b -> Printf.eprintf
             "Failed fulfilling template:\n%s\nExpected:\n%s\nGot:\n%s\n\n" tmp b a) in
         Assert.test (templatize tmp context dummy_request) str err in
 
