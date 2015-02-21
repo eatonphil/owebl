@@ -2,7 +2,6 @@ open Response
 open Rule
 open Template
 open Server
-open Verb
 
 let context = Context.make [
     ("first_name", Context.Var "Phil");
@@ -12,13 +11,11 @@ let context = Context.make [
 
 let handler =
     Handler.create
-        (StaticRouteRule.create "/" [GET])
+        (StaticRouteRule.create "/" [Verb.GET])
         (TemplateResponse.create
             ~template_dir:(FileResponse.TemplateDir "examples/template_server/templates")
             ~static_file:(FileResponse.StaticFile "/index.html")
             ~context:context
             ())
 
-let server = SimpleServer.create [handler];;
-
-server#serve
+let server = SimpleServer.serve [handler]
