@@ -44,16 +44,14 @@ module Server = struct
         | EmptyRequest -> do_listen_helper client_sock listen_sock handlers child_procs
         | ValidRequest request -> begin
             Printf.printf "%s\n%s\n" Utils.timestamp request#to_string;
-            if child_proces < max_child_procs then
+            if child_procs < max_child_procs then
             match Unix.fork () with
             | 0 -> begin
                 Unix.close listen_sock;
                 validate client_sock (get_response request handlers);
                 exit 0
             end
-            | _ -> begin
-                else do_listen_helper client_sock listen_sock handlers (child_procs + 1)
-            end
+            | _ -> do_listen_helper client_sock listen_sock handlers (child_procs + 1)
             else let _ = Unix.wait () in
             do_listen_helper client_sock listen_sock handlers (child_procs - 1)
         end;
