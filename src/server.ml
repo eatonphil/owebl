@@ -4,7 +4,7 @@ module Server = struct
     let listen_sock = Unix.socket Unix.PF_INET Unix.SOCK_STREAM 0
 
     let read_from_sock socket =
-        let buffer = Bytes.create 512 in
+        let buffer = String.create 512 in
         let rec read_all request buffer =
             let r = Unix.read socket buffer 0 512 in
             if r < 512 then request ^ buffer
