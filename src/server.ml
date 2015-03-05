@@ -36,30 +36,31 @@ module Server = struct
         | Response.Empty -> ()
         | Response.ValidResponse valid_response -> write_to_sock client_sock valid_response
 
-    let max_child_procs = 100
+    (* http://pleac.sourceforge.net/pleac_ocaml/sockets.html *)
+    let rec reaper signal =
+        try while true do ignore (Unix.waitpid [Unix.WNOHANG] (-1)) done
+        with _ -> ();
+        Sys.set_signal Sys.sigchld (Sys.Signal_handle reaper)
 
-    let rec do_listen listen_sock handlers child_procs =
+    let rec do_listen listen_sock handlers =
         let (client_sock, _) = Unix.accept listen_sock in
         match get_request client_sock with
-        | EmptyRequest -> do_listen_helper client_sock listen_sock handlers child_procs
+        | EmptyRequest -> do_listen_helper client_sock listen_sock handlers
         | ValidRequest request -> begin
             Printf.printf "%s\n%s\n" Utils.timestamp request#to_string;
-            if child_procs < max_child_procs then
             match Unix.fork () with
             | 0 -> begin
                 Unix.close listen_sock;
                 validate client_sock (get_response request handlers);
                 exit 0
             end
-            | _ -> do_listen_helper client_sock listen_sock handlers (child_procs + 1)
-            else let _ = Unix.wait () in
-            do_listen_helper client_sock listen_sock handlers (child_procs - 1)
+            | _ -> do_listen_helper client_sock listen_sock handlers
         end;
         ()
 
-    and do_listen_helper client_sock listen_sock handlers child_procs =
+    and do_listen_helper client_sock listen_sock handlers =
         Unix.close client_sock;
-        do_listen listen_sock handlers child_procs;
+        do_listen listen_sock handlers;
         ()
 
     class server address port handlers =
@@ -69,10 +70,11 @@ module Server = struct
                     (Unix.ADDR_INET (Unix.inet_addr_of_string address, port)) in
                 Unix.bind listen_sock addr_inet;
                 Unix.listen listen_sock 8;
-                do_listen listen_sock handlers 0
+                do_listen listen_sock handlers
         end
 
     let create address port handlers =
+        Sys.set_signal Sys.sigchld (Sys.Signal_handle reaper);
         new server address port handlers
 end
 
