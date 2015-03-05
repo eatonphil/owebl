@@ -7,7 +7,8 @@ module Server = struct
         let buffer = String.create 512 in
         let rec read_all request buffer =
             let r = Unix.read socket buffer 0 512 in
-            if r < 512 then request ^ buffer
+            if r < 512 then
+                (String.sub request 0 r) ^ buffer
             else read_all (request ^ buffer) buffer in
         read_all "" buffer
 
@@ -35,12 +36,6 @@ module Server = struct
         match response with
         | Response.Empty -> ()
         | Response.ValidResponse valid_response -> write_to_sock client_sock valid_response
-
-    (* http://pleac.sourceforge.net/pleac_ocaml/sockets.html *)
-    let rec reaper signal =
-        try while true do ignore (Unix.waitpid [Unix.WNOHANG] (-1)) done
-        with _ -> ();
-        Sys.set_signal Sys.sigchld (Sys.Signal_handle reaper)
 
     let rec do_listen listen_sock handlers =
         let (client_sock, _) = Unix.accept listen_sock in
