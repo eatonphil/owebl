@@ -74,7 +74,7 @@ module Server = struct
         end
 
     let create address port handlers =
-        Sys.set_signal Sys.sigchld (Sys.Signal_handle reaper);
+        Sys.set_signal Sys.sigchld Sys.Signal_ignore;
         new server address port handlers
 end
 
