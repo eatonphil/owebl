@@ -8,7 +8,7 @@ module Server = struct
         let rec read_all request buffer =
             let r = Unix.read socket buffer 0 512 in
             if r < 512 then
-                (String.sub request 0 r) ^ buffer
+                request ^ (String.sub buffer 0 r)
             else read_all (request ^ buffer) buffer in
         read_all "" buffer
 
