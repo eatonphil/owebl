@@ -24,7 +24,6 @@ module Server = struct
         then ValidRequest (Request.create_from_literal sock_contents)
         else EmptyRequest
 
-
     let rec get_response (request: Request.t) (handlers: Handler.t list) =
         match handlers with
         | [] -> Response.Empty

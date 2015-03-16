@@ -5,11 +5,11 @@ module Response = struct
 
     type t = < get_response: Request.t -> r >
 
-    let http_response (initial_response: string) (response_code: string)
-    (content_type: string) (content_charset: string) (headers: string list) =
+    let http_response (u_response: string) (u_status: string)
+    (u_ctype: string) (u_ccharset: string) (u_headers: string list) =
         ValidResponse (Printf.sprintf "HTTP/1.1 %s\nContent-Type: %s;\
-        charset=%s\nContent-Length: %d\n\n%s" response_code content_type
-        content_charset (String.length initial_response) initial_response)
+        charset=%s\nContent-Length: %d\n\n%s" u_status u_ctype
+        u_ccharset (String.length u_response) u_response)
 
     class virtual response =
         object
@@ -20,17 +20,16 @@ end
 module SimpleResponse = struct
     include Response
 
-    let simple_http_response (initial_response: string) : Response.r =
-        http_response initial_response "200 OK" "text/html" "utf-8" []
+    let simple_http_response (u_response: string) : Response.r =
+        http_response u_response "200 OK" "text/html" "utf-8" []
 
-
-    class simple_response (string_response: string) =
+    class simple_response (u_response: string) =
         object
             method get_response (request: Request.t) : r =
-                simple_http_response string_response
+                simple_http_response u_response
         end
 
-    let create (string_response: string) = new simple_response string_response
+    let create (u_response: string) = new simple_http_response u_response
 end
 
 module FileResponse = struct
@@ -91,4 +90,28 @@ module TemplateResponse = struct
         ?(context: Context.t = Context.make [])
         () =
             new template_response template_dir static_file context
+end
+
+module ErrorResponse = struct
+    include Response
+
+    type e =
+        | ERROR_404
+        | ERROR_502
+
+    let error_map (u_error: e) = match u_error with
+    | ERROR_404 -> "404 Not Found"
+    | ERROR_502 -> "502 Internal Server Error"
+
+    let error_http_response (u_error: e) (u_response: string): Response.r =
+        http_response u_response u_error "text/html" "utf-8" []
+
+    class error_response (u_error: e) (u_response: string) =
+        object
+            method get_response (request: Request.t) : r =
+                error_http_response u_error u_response
+        end
+
+    let create (u_error: e) (u_response: string) =
+        new error_response u_error u_response 
 end
