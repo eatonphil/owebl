@@ -8,6 +8,7 @@ massive and difficult to maneuver.
 Look at how easy it is to use:
 
 ```ocaml
+open OWebl
 open Response
 open Rule
 open Server
