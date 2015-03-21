@@ -29,7 +29,7 @@ module SimpleResponse = struct
                 simple_http_response u_response
         end
 
-    let create (u_response: string) = new simple_http_response u_response
+    let create (u_response: string) = new simple_response u_response
 end
 
 module FileResponse = struct
@@ -92,6 +92,7 @@ module TemplateResponse = struct
             new template_response template_dir static_file context
 end
 
+(*
 module ErrorResponse = struct
     include Response
 
@@ -115,3 +116,4 @@ module ErrorResponse = struct
     let create (u_error: e) (u_response: string) =
         new error_response u_error u_response 
 end
+*)

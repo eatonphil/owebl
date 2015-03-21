@@ -1,26 +1,13 @@
-DEPS = src
-LIBS = unix,str
+OCAMLMAKEFILE = OCamlMakeFile
 
-LFLAGS = -libs $(LIBS)
-CFLAGS = -Is $(DEPS)
+LIB_PACK_NAME = owebl
+RESULT = owebl
+SOURCES = src/utils.ml src/verb.ml src/request.ml src/template.ml src/response.ml src/rule.ml src/handler.ml src/server.ml
+PACKS = unix str
 
-SS = examples/simple_server/main
+all: native-code-library byte-code-library
+install:
+	ocamlfind install owebl META owebl.o owebl.cmi owebl.cma owebl.cmxa owebl.a
+uninstall: libuninstall
 
-simpleserver: $(DEPS)/*.ml $(SS).ml
-	ocamlbuild $(LFLAGS) $(CFLAGS) $(SS).native
-
-FS = examples/file_server/main
-
-fileserver: $(DEPS)/*.ml $(FS).ml
-	ocamlbuild $(LFLAGS) $(CFLAGS) $(FS).native
-
-TS = examples/template_server/main
-
-templateserver: $(DEPS)/*.ml $(TS).ml
-	ocamlbuild $(LFLAGS) $(CFLAGS) $(TS).native
-
-test: $(DEPS)/*.ml tests/*.ml
-	ocamlbuild $(LFLAGS) $(CFLAGS),tests tests/test.native
-
-clean:
-	rm -rf _build *.native *.byte
+include $(OCAMLMAKEFILE)
