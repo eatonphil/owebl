@@ -64,7 +64,11 @@ let get_headers request =
     else []
 
 let get_body request =
-    Utils.substr_index request "\n\n" 1
+    let rec get_body_helper body index =
+        let body_section = Utils.substr_index request "\n\n" index in
+        if body_section = "" then body
+        else get_body_helper (body ^ body_section) (index + 1) in
+    get_body_helper "" 1
 
 let create_from_literal (request: string) =
     let verb = get_verb request in

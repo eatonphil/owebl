@@ -52,7 +52,7 @@ module FileResponse = struct
                     | TemplateDir custom_dir -> custom_dir) in
                     let file_string =
                         Utils.read_file_to_string (dir ^ file_name) in
-                        SimpleResponse.simple_http_response file_string
+                    SimpleResponse.simple_http_response file_string
         end
 
     let create
