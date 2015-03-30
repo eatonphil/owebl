@@ -70,12 +70,12 @@ Contribute
 
 - Issue Tracker: github.com/eatonphil/owebl/issues
 - Source Code: github.com/eatonphil/owebl
+- Mailing List: https://groups.google.com/forum/#!forum/owebl
 
 Support
 -------
 
-If you are having issues, please let us know.
-Email me at me@eatonphil.com
+If you are having issues, please let us know. Please use the mailing list for any questions that may help the general audience.
 
 License
 -------
