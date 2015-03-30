@@ -6,7 +6,7 @@ let substr_index (str: string) (delimiter: string) (index: int) =
 
 let read_from_fd fd read_timeout =
     let buff_size = 4096 in
-    let buff = Bytes.create buff_size in
+    let buff = String.create buff_size in
     let rec read_data last_data current_data =
         if last_data = current_data then current_data
         else let last_data = current_data in

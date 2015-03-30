@@ -1,7 +1,7 @@
 module StringMap = Map.Make(String);;
 
 module Context = struct
-    type f = Request.t -> string
+    type f = string list -> Request.t -> string
     type t = m StringMap.t
     and m =
         | Var of string
@@ -12,6 +12,9 @@ module Context = struct
 
     let get (key: string) (ctx: t) : m =
         StringMap.find key ctx
+
+    let add (key: string) (value: m) (ctx: t) : t =
+        StringMap.add key value ctx
 
     let make (l: (string * m) list) : t =
         let ctx = StringMap.empty in
@@ -30,10 +33,13 @@ let tm = '`'
 let tm_str = String.make 1 tm
 
 let fulfill_key (key: string) (ctx: Context.t) (req: Request.t): string =
+    match Str.split (Str.regexp " ") key with
+    | [] -> Printf.printf "Template error: no key specified.\n"; ""
+    | (key :: args) ->
     if (Context.exists key ctx) then begin
         match Context.get key ctx with
         | Context.Var v -> v
-        | Context.Fun f -> f req
+        | Context.Fun f -> f args req
     end
     else begin
         Printf.printf "Template error: key \"%s\" not found.\n" key;
