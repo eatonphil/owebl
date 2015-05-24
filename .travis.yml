@@ -1,2 +1,5 @@
-language: c
-script: bash -ex travis-ch.sh
+language: bash
+before_script:
+    - sudo apt-get update -qq
+    - sudo apt-get install -qq ocaml
+script: bash travis-ci.sh
