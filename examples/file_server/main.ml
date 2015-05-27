@@ -2,12 +2,18 @@ open Response
 open Rule
 open Server
 
-let handler =
+let first_handler =
     Handler.create
         (RegexRouteRule.create "/[a-zA-Z]*99/" [Verb.GET])
         (FileResponse.create
-            ~template_dir:(FileResponse.TemplateDir "examples/file_server/templates")
-            ~static_file:(FileResponse.StaticFile "/index.html")
+            ~static_file:(FileResponse.StaticFile "examples/file_server/index.html")
             ())
 
-let server = SimpleServer.serve [handler]
+let second_handler =
+    Handler.create
+        (StaticRouteRule.create "/img" [Verb.GET])
+        (FileResponse.create
+            ~static_file:(FileResponse.StaticFile "examples/file_server/test.png")
+            ())
+
+let server = SimpleServer.serve [first_handler; second_handler]

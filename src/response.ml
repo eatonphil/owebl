@@ -36,30 +36,24 @@ module FileResponse = struct
     include Response
 
     type f = NoStaticFile | StaticFile of string
-    type d = DefaultTemplateDir | TemplateDir of string
 
-    let default_template_dir = "templates"
-
-    class file_response (template_dir: d) (static_file: f) =
+    class file_response (static_file: f) =
         object
             method get_response (request: Request.t) : r =
                 let file_name = (match static_file with
                 | NoStaticFile -> request#get_path
                 | StaticFile file -> file) in
-                let dir =
-                    (match template_dir with
-                    | DefaultTemplateDir -> default_template_dir
-                    | TemplateDir custom_dir -> custom_dir) in
-                    let file_string =
-                        Utils.read_file_to_string (dir ^ file_name) in
-                    SimpleResponse.simple_http_response file_string
+                let file_string =
+                    Utils.read_file_to_string file_name in
+                let mime_type =
+                    Mime.get_mime_type file_name in
+                Response.http_response file_string "200 OK" mime_type "utf-8" []
         end
 
     let create
-        ?(template_dir: d = DefaultTemplateDir)
         ?(static_file: f = NoStaticFile)
         () =
-            new file_response template_dir static_file 
+            new file_response static_file 
 end
 
 module TemplateResponse = struct
@@ -68,11 +62,10 @@ module TemplateResponse = struct
     include Response
 
     class template_response
-        (template_dir: FileResponse.d)
         (static_file: FileResponse.f)
         (context: Context.t) = 
         object
-            inherit FileResponse.file_response template_dir static_file as super
+            inherit FileResponse.file_response static_file as super
 
             method get_response (request: Request.t) : r =
                 let response = super#get_response request in
@@ -85,9 +78,8 @@ module TemplateResponse = struct
         end
 
     let create
-        ?(template_dir: FileResponse.d = FileResponse.DefaultTemplateDir)
         ?(static_file: FileResponse.f = FileResponse.NoStaticFile)
         ?(context: Context.t = Context.make [])
         () =
-            new template_response template_dir static_file context
+            new template_response static_file context
 end

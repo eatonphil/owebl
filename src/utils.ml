@@ -1,8 +1,10 @@
 let substr_index (str: string) (delimiter: string) (index: int) =
     let split = Str.split (Str.regexp delimiter) str in
-    let length = Array.length (Array.of_list split) in
-    if index >= length || index < 0 then ""
-    else List.nth split index
+    let length = List.length split in
+    if index >= length then ""
+    else let n = if index >= 0 then index
+        else length + index in
+    List.nth split n
 
 let read_from_fd fd read_timeout =
     let buff_size = 4096 in
