@@ -91,29 +91,3 @@ module TemplateResponse = struct
         () =
             new template_response template_dir static_file context
 end
-
-(*
-module ErrorResponse = struct
-    include Response
-
-    type e =
-        | ERROR_404
-        | ERROR_502
-
-    let error_map (u_error: e) = match u_error with
-    | ERROR_404 -> "404 Not Found"
-    | ERROR_502 -> "502 Internal Server Error"
-
-    let error_http_response (u_error: e) (u_response: string): Response.r =
-        http_response u_response u_error "text/html" "utf-8" []
-
-    class error_response (u_error: e) (u_response: string) =
-        object
-            method get_response (request: Request.t) : r =
-                error_http_response u_error u_response
-        end
-
-    let create (u_error: e) (u_response: string) =
-        new error_response u_error u_response 
-end
-*)
