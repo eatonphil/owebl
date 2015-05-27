@@ -1,6 +1,9 @@
 OWebl
 ====
 
+[![Build Status](https://travis-ci.org/eatonphil/owebl.svg?branch=master)](https://travis-ci.org/eatonphil/owebl/)
+
+
 OWebl is a simple web framework for OCaml. While other frameworks do exist
 for writing web applications in OCaml (ocsigen, js_of_caml), these are
 massive and difficult to maneuver.
