@@ -16,10 +16,13 @@
 
 ## Architecture
 
-* file-type deduction (or lookup)
-  * sending a file of a "unique" type (not text/html) requires explicitly setting the file-type
 * standard template library
   * for instance, end-users need not duplicate the "include" code in every OWebl project that needs that functionality
 * SSL termination
   * obviously not strictly necessary, but could be a fun optional component
 * move from pure forking to async io with forking for larger connection support
+
+## Misc
+
+* add startup information (port, address, etc)
+  * something with forking currently precludes this from happening
