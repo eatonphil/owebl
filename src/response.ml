@@ -41,8 +41,9 @@ module FileResponse = struct
         object
             method get_response (request: Request.t) : r =
                 let file_name = (match static_file with
-                | NoStaticFile -> request#get_path
+                | NoStaticFile -> "." ^ request#get_path
                 | StaticFile file -> file) in
+                print_string file_name;
                 let file_string =
                     Utils.read_file_to_string file_name in
                 let mime_type =
