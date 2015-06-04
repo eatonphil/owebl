@@ -18,9 +18,12 @@
 
 * standard template library
   * for instance, end-users need not duplicate the "include" code in every OWebl project that needs that functionality
+* convert to using recore
+  * stdlib alternative
 * SSL termination
   * obviously not strictly necessary, but could be a fun optional component
 * move from pure forking to async io with forking for larger connection support
+* add gzip support, vary header
 
 ## Misc
 
