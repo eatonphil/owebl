@@ -1,81 +1,109 @@
 open Recore.Std
 
+module Headers = String.Map
+
+let toStrings delim map =
+    let fn key value accum =
+        let kv = (Printf.sprintf "%s%s%s" key delim value) in
+        (kv :: accum) in
+    Headers.fold fn map []
+
+
+let toString delim kvDelim map =
+    let fn first second =
+        if first = "" then second
+        else Printf.sprintf "%s%s%s" first delim second in
+    List.fold_left fn "" (toStrings kvDelim map)
+
+type h = string Headers.t
+
 type t = <
-    get_uri: string;
-    get_verb: Verb.t;
-    get_version: string;
-    get_headers: string list;
-    get_body: string;
-    get_path: string;
-    get_query: string;
-    to_string: string
+    getUri: string;
+    getVerb: Verb.t;
+    getVersion: string;
+    getHeaders: h;
+    getBody: string;
+    getPath: string;
+    getQuery: string;
+    toString: string
 >
 
-let opt_prepend p s =
+
+let optPrepend p s =
     if s = ""
     then ""
     else (p ^ s)
 
-class request (verb: Verb.t) (uri: string) (version: string) (headers: string list) (body: string) =
+
+class request (verb: Verb.t) (uri: string) (version: string) (headers: h) (body: string) =
     object(self)
-        method get_uri = uri
-        method get_verb = verb
-        method get_version = version
-        method get_headers = headers
-        method get_body = body
+        method getUri = uri
+        method getVerb = verb
+        method getVersion = version
+        method getHeaders = headers
+        method getBody = body
         
-        val path = String.nthFromSplit uri "?" 0
-        val query = String.nthFromSplit uri "?" 1
+        val path = String.nthFromSplit "?" uri 0
+        val query = String.nthFromSplit "?" uri 1
 
-        method get_path = path
-        method get_query = query
+        method getPath = path
+        method getQuery = query
 
-        method to_string =
+        method toString =
             Printf.sprintf "%s %s %s%s%s"
-            (Verb.to_string verb)
+            (Verb.toString verb)
             uri
             version
-            (opt_prepend "\n" (String.concat "\n" headers))
-            (opt_prepend "\n\n" body)
+            (optPrepend "\n" (toString "\n" ": " headers))
+            (optPrepend "\n\n" body)
     end
 
-let create (verb: Verb.t) (uri: string) (version: string) (headers: string list) (body: string) =
+
+let getVerb request =
+    Verb.create (String.nthFromSplit " " request 0)
+
+
+let getUri request =
+    String.nthFromSplit " " request 1
+
+
+let getVersion request =
+    String.nthFromSplit " " (String.nthFromSplit "\n" request 0) 2
+
+
+let getHeaders request : h =
+    let lines = Array.fromList (String.split "\n" request) in
+    if Array.len lines > 1
+    then let headers_with_body =
+        Array.sub lines 1 ((Array.len lines) - 1) in
+        let rec retainHeaders headers remaining =
+            match remaining with
+            | [] -> headers
+            | (header :: rest) -> if header = "" then headers
+            else let (key, value) =
+                (String.nthFromSplit ": " header 0,
+                 String.nthFromSplit ": " header 1) in
+            retainHeaders (Headers.add key value headers) rest in
+        retainHeaders Headers.empty (Array.toList headers_with_body)
+    else Headers.empty
+
+
+let getBody request =
+    let rec getBodyHelper body index =
+        let body_section = String.nthFromSplit "\n\n" request index in
+        if body_section = "" then body
+        else getBodyHelper (body ^ body_section) (index + 1) in
+    getBodyHelper "" 1
+
+
+let create (verb: Verb.t) (uri: string) (version: string) (headers: h) (body: string) =
     new request verb uri version headers body
 
-let get_verb request =
-    Verb.create (String.nthFromSplit request " " 0)
 
-let get_uri request =
-    String.nthFromSplit request " " 1
-
-let get_version request =
-    String.nthFromSplit (String.nthFromSplit request " " 2) "\n" 0
-
-let get_headers request =
-    let lines = Array.of_list (Str.split (Str.regexp "\n") request) in
-    if Array.length lines > 1
-    then let headers_with_body = Array.sub lines 1 ((Array.length lines) - 1) in
-    let rec retain_headers headers remaining =
-        (match remaining with
-        | [] -> headers
-        | (header :: rest) -> if header = ""
-        then headers
-        else retain_headers (header :: headers) rest) in
-    let h = retain_headers [] (Array.to_list headers_with_body) in
-    List.rev h
-    else []
-
-let get_body request =
-    let rec get_body_helper body index =
-        let body_section = String.nthFromSplit request "\n\n" index in
-        if body_section = "" then body
-        else get_body_helper (body ^ body_section) (index + 1) in
-    get_body_helper "" 1
-
-let create_from_literal (request: string) =
-    let verb = get_verb request in
-    let uri = get_uri request in
-    let version = get_version request in
-    let headers = get_headers request in
-    let body = get_body request in
+let createFromLiteral (request: string) =
+    let verb = getVerb request in
+    let uri = getUri request in
+    let version = getVersion request in
+    let headers = getHeaders request in
+    let body = getBody request in
     create verb uri version headers body

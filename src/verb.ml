@@ -5,7 +5,7 @@ let create (verb: string) : t =
     | "GET" -> GET
     | _ -> POST
 
-let to_string (verb: t) : string =
+let toString (verb: t) : string =
     match verb with
     | GET -> "GET"
     | _ -> "POST"

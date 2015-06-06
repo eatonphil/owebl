@@ -1,17 +1,17 @@
 open Template
 
 let dummy_request =
-    Request.create Verb.GET "/" "HTTP/1.1" [] ""
+    Request.create Verb.GET "/" "HTTP/1.1" Request.Headers.empty ""
 
-let context = Context.make [
-    ("name", Context.Var "Phil");
-    ("world", Context.Var "World");
-    ("first_name", Context.Var "Grace");
-    ("last_name", Context.Var "Kelly");
-    ("img", Context.Ctx (Context.make [
-        ("src", Context.Var "/home")
-    ]));
-]
+let context = Context.(empty
+    |> add "name"       (Context.Var "Phil")
+    |> add "world"      (Context.Var "World")
+    |> add "first_name" (Context.Var "Grace")
+    |> add "last_name"  (Context.Var "Kelly")
+    |> add "img"        (Context.Ctx Context.(empty
+        |> add "src"    (Context.Var "/home")
+    ))
+)
 
 let test =
     let _assert tmp str =
