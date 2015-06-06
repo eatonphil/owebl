@@ -20,7 +20,7 @@ let m = MimeTypes.(empty
 )
 
 
-let getFileType file_name = String.nthFromSplit file_name "\\." (-1)
+let getFileType file_name = String.nthFromSplit "\\." file_name (-1)
 
 
 let getMimeType file_name =

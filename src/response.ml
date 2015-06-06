@@ -40,9 +40,12 @@ module FileResponse = struct
     class file_response (static_file: string) =
         object
             method getResponse (request: Request.t) : r =
-                let file_name = (match static_file with
-                | "" -> "." ^ request#get_path
-                | file -> file) in
+                let file_name =
+                    if static_file = "" then "." ^ request#get_path
+                    else static_file
+
+                let last_modified =
+                    Time.rfc822 (Unix.gmtime (Unix.stat file_name).Unix.st_mtime)
 
                 let file_string =
                     File.read file_name in
@@ -50,10 +53,8 @@ module FileResponse = struct
                 let mime_type =
                     Mime.getMimeType file_name in
 
-
                 let cache_headers = [
-                    ("Last-Modified: " ^
-                        (Time.rfc822 (Unix.gmtime (Unix.stat file_name).Unix.st_mtime)))
+                    "Last-Modified: " ^ last_modified
                 ] in
 
                 Response.http_response file_string "200 OK" mime_type "utf-8" cache_headers

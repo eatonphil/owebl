@@ -3,4 +3,5 @@ before_script:
     - sudo add-apt-repository ppa:avsm/ocaml42+opam120 -y
     - sudo apt-get update -qq
     - sudo apt-get install -qq ocaml
+    - git clone https://github.com/eatonphil/recore
 script: make test && ./test.native

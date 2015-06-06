@@ -1,34 +1,15 @@
 open Recore.Std
 
-module StringMap = Map.Make(String);;
-
 module Context = struct
-    type f = string list -> t -> Request.t -> string
-    and t = m StringMap.t
+    include String.Map
+
+    type f = string list -> c -> Request.t -> string
+    and c = m t
     and m =
         | Var of string
         | Fun of f
-        | Ctx of t
-        | Arr of t list
-
-    let exists (key: string) (ctx: t) : bool =
-        StringMap.exists (fun nth_key ctx -> nth_key = key) ctx
-
-    let get (key: string) (ctx: t) : m =
-        StringMap.find key ctx
-
-    let add (key: string) value (ctx: t) : t =
-        StringMap.add key (value :> m)  ctx
-
-    let make (l: (string * m) list) : t =
-        let ctx = StringMap.empty in
-        let rec makeHelper l ctx =
-            match l with
-            | [] -> ctx
-            | (key, value) :: tail -> let ctx =
-                StringMap.add key value ctx in
-            makeHelper tail ctx in
-        makeHelper l ctx
+        | Ctx of c
+        | Arr of c list
 end
 
 
@@ -37,11 +18,11 @@ let tm_start = "{{"
 let tm_end = "}}"
 
 
-let rec fulfillKey (key: string) (ctx: Context.t) (req: Request.t): string =
+let rec fulfillKey (key: string) (ctx: Context.c) (req: Request.t) = 
     match Str.split (Str.regexp " ") key with
     | [] -> Printf.printf "Template error: no key specified.\n"; ""
     | (key :: args) ->
-    if (Context.exists key ctx) then begin
+    if Context.exists key ctx then
         match Context.get key ctx with
         | Context.Var v -> v
         | Context.Fun f -> f args ctx req
@@ -50,11 +31,7 @@ let rec fulfillKey (key: string) (ctx: Context.t) (req: Request.t): string =
             | [] -> Printf.printf "Template error: index not found for key (array): %s" key; ""
             | (ind :: args) -> let c = (List.nth a (int_of_string ind)) in
                 fulfillKey (String.join " " args) c req
-    end
-    else begin
-        Printf.printf "Template error: key \"%s\" not found.\n" key;
-        ""
-    end
+    else (Printf.printf "Template error: key \"%s\" not found.\n" key; "")
 
 
 let escaped str ind =
@@ -71,7 +48,7 @@ let rec getEndIndex str ind =
     | false -> Printf.printf "Template error: template not terminated.\n"; -1
 
 
-let templatize (tmp: string) (ctx: Context.t) (req: Request.t) : string =
+let templatize (tmp: string) (ctx: Context.c) (req: Request.t) : string =
     let fn ind tmp =
         if ind < (String.len tmp) && escaped tmp ind = false then
             match String.indexOf tm_start tmp ind = ind with
