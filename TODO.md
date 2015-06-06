@@ -24,6 +24,7 @@
   * obviously not strictly necessary, but could be a fun optional component
 * move from pure forking to async io with forking for larger connection support
 * add gzip support, vary header
+* set cache headers from a config
 
 ## Misc
 
