@@ -1,11 +1,15 @@
+open Recore.Std
+
 module StringMap = Map.Make(String);;
 
 module Context = struct
-    type f = string list -> Request.t -> string
-    type t = m StringMap.t
+    type f = string list -> t -> Request.t -> string
+    and t = m StringMap.t
     and m =
         | Var of string
         | Fun of f
+        | Ctx of t
+        | Arr of t list
 
     let exists (key: string) (ctx: t) : bool =
         StringMap.exists (fun nth_key ctx -> nth_key = key) ctx
@@ -13,76 +17,77 @@ module Context = struct
     let get (key: string) (ctx: t) : m =
         StringMap.find key ctx
 
-    let add (key: string) (value: m) (ctx: t) : t =
-        StringMap.add key value ctx
+    let add (key: string) value (ctx: t) : t =
+        StringMap.add key (value :> m)  ctx
 
     let make (l: (string * m) list) : t =
         let ctx = StringMap.empty in
-        let rec make_helper l ctx =
+        let rec makeHelper l ctx =
             match l with
             | [] -> ctx
             | (key, value) :: tail -> let ctx =
                 StringMap.add key value ctx in
-            make_helper tail ctx in
-        make_helper l ctx
+            makeHelper tail ctx in
+        makeHelper l ctx
 end
 
 
 (* Template marker. *)
-let tm = '`'
-let tm_str = String.make 1 tm
+let tm_start = "{{"
+let tm_end = "}}"
 
-let fulfill_key (key: string) (ctx: Context.t) (req: Request.t): string =
+
+let rec fulfillKey (key: string) (ctx: Context.t) (req: Request.t): string =
     match Str.split (Str.regexp " ") key with
     | [] -> Printf.printf "Template error: no key specified.\n"; ""
     | (key :: args) ->
     if (Context.exists key ctx) then begin
         match Context.get key ctx with
         | Context.Var v -> v
-        | Context.Fun f -> f args req
+        | Context.Fun f -> f args ctx req
+        | Context.Ctx c -> fulfillKey (String.join " " args) c req
+        | Context.Arr a -> match args with
+            | [] -> Printf.printf "Template error: index not found for key (array): %s" key; ""
+            | (ind :: args) -> let c = (List.nth a (int_of_string ind)) in
+                fulfillKey (String.join " " args) c req
     end
     else begin
         Printf.printf "Template error: key \"%s\" not found.\n" key;
         ""
     end
 
-let fulfillment_index key value index =
-    index - (String.length key + 2) + String.length value
+
+let escaped str ind =
+    ind <> 0 && str.[ind - 1] = '\\'
+
+
+let rec getEndIndex str ind =
+    match ind < (String.len str - 1) with
+    | true ->
+        let endi = String.indexOf tm_end str ind in
+        if escaped str endi
+        then getEndIndex str (ind + 1)
+        else endi
+    | false -> Printf.printf "Template error: template not terminated.\n"; -1
+
 
 let templatize (tmp: string) (ctx: Context.t) (req: Request.t) : string =
-    let rec templatize_rec tmp i (in_tmp_key: bool) (tmp_key: string) =
-        if i < (String.length tmp) then begin
-            let c = tmp.[i] in match c = tm with
-            | true -> if (i > 0 && tmp.[i-1] = '\\')
-            then let escaped_tmp =
-                Str.replace_first (Str.regexp ("\\\\" ^ tm_str)) tm_str tmp in
-            templatize_rec escaped_tmp i in_tmp_key tmp_key
-            else begin
-                if in_tmp_key
-                then begin
-                    let key_fulfilled =
-                        fulfill_key tmp_key ctx req in
-                    let new_index =
-                        fulfillment_index tmp_key key_fulfilled i in
-                    let tmp_key_fulfilled =
-                        let key_start = (i - String.length tmp_key - 1) in
-                        let previous = String.sub tmp 0 key_start in
-                        let current = String.sub tmp key_start (String.length tmp - key_start) in
-                        let key_regexp = Str.regexp (tm_str ^ tmp_key ^ tm_str) in
-                        previous ^ (Str.replace_first key_regexp key_fulfilled current) in
-                    templatize_rec tmp_key_fulfilled (new_index+1) false ""
-                end 
-                else templatize_rec tmp (i + 1) true ""
-            end
-            | false -> match in_tmp_key with
-                | true ->
-                    templatize_rec tmp (i + 1) true (tmp_key ^ (String.make 1 c))
-                | false -> 
-                    templatize_rec tmp (i + 1) false ""
-        end
-        else
-            (*if in_tmp_key then Printf.printf
-            "Missing template end marker of key for request:\n%s\n"
-            req#to_string;*)
-            tmp in
-    templatize_rec tmp 0 false ""
+    let fn ind tmp =
+        if ind < (String.len tmp) && escaped tmp ind = false then
+            match String.indexOf tm_start tmp ind = ind with
+            | true -> let endi = getEndIndex tmp ind in
+                if endi = (-1) then (tmp, ind + 1)
+                else let starti = ind + String.len tm_start in
+                    let key = String.sub tmp starti (endi - starti) in
+                    let resolved_key = fulfillKey key ctx req in
+                    let resolved_tmp =
+                        String.replace (tm_start ^ key ^ tm_end) resolved_key tmp in
+                    (resolved_tmp, ind)
+            | false -> (tmp, ind + 1)
+        else match ind <> 0 && escaped tmp ind with
+        | false -> (tmp, ind + 1)
+        | true -> let resolved_escape =
+                let first_char_str = String.make 1 tm_start.[0] in
+            String.replace ({|\|} ^ first_char_str) first_char_str tmp in
+            (resolved_escape, ind) in
+    String.mapi fn tmp

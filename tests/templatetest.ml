@@ -6,9 +6,11 @@ let dummy_request =
 let context = Context.make [
     ("name", Context.Var "Phil");
     ("world", Context.Var "World");
-    ("first_name", Context.Var "Joe");
-    ("last_name", Context.Var "Biden");
-    ("tm_test", Context.Var "`")
+    ("first_name", Context.Var "Grace");
+    ("last_name", Context.Var "Kelly");
+    ("img", Context.Ctx (Context.make [
+        ("src", Context.Var "/home")
+    ]));
 ]
 
 let test =
@@ -18,27 +20,23 @@ let test =
         Assert.test (templatize tmp context dummy_request) str err in
 
     _assert
-    "Hello, `world`! My name is `name`."
+    "{{world}}"
+    "World";
+
+    _assert
+    "Hello, {{world}}! My name is {{name}}."
     "Hello, World! My name is Phil.";
 
     _assert
-    "Hello, `world``world`! My name is `name`"
+    "Hello, {{world}}{{world}}! My name is {{name}}"
     "Hello, WorldWorld! My name is Phil";
 
     _assert
-    "`tm_test` is the template marker."
-    "` is the template marker.";
+    "<img src='{{img src}}'/>"
+    "<img src='/home'/>";
 
     _assert
-    "\\`name\\``world`\\``tm_test`"
-    "`name`World``";
-
-    _assert
-    "\\`name\\``name`\\``name`"
-    "`name`Phil`Phil";
-
-    _assert
-    "`last_name`, `first_name` is me."
-    "Biden, Joe is me.";
+    {|\{\{name}}\{\{{{world}}}}|}
+    "{{name}}{{World}}";
 
     ()

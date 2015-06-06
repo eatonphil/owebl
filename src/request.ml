@@ -1,3 +1,5 @@
+open Recore.Std
+
 type t = <
     get_uri: string;
     get_verb: Verb.t;
@@ -22,8 +24,8 @@ class request (verb: Verb.t) (uri: string) (version: string) (headers: string li
         method get_headers = headers
         method get_body = body
         
-        val path = Utils.substr_index uri "?" 0
-        val query = Utils.substr_index uri "?" 1
+        val path = String.nthFromSplit uri "?" 0
+        val query = String.nthFromSplit uri "?" 1
 
         method get_path = path
         method get_query = query
@@ -41,13 +43,13 @@ let create (verb: Verb.t) (uri: string) (version: string) (headers: string list)
     new request verb uri version headers body
 
 let get_verb request =
-    Verb.create (Utils.substr_index request " " 0)
+    Verb.create (String.nthFromSplit request " " 0)
 
 let get_uri request =
-    Utils.substr_index request " " 1
+    String.nthFromSplit request " " 1
 
 let get_version request =
-    Utils.substr_index (Utils.substr_index request " " 2) "\n" 0
+    String.nthFromSplit (String.nthFromSplit request " " 2) "\n" 0
 
 let get_headers request =
     let lines = Array.of_list (Str.split (Str.regexp "\n") request) in
@@ -65,7 +67,7 @@ let get_headers request =
 
 let get_body request =
     let rec get_body_helper body index =
-        let body_section = Utils.substr_index request "\n\n" index in
+        let body_section = String.nthFromSplit request "\n\n" index in
         if body_section = "" then body
         else get_body_helper (body ^ body_section) (index + 1) in
     get_body_helper "" 1

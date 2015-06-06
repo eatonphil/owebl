@@ -17,7 +17,7 @@ templateserver:
 	ocamlbuild -libs unix,str -Is src examples/template_server/main.native
 
 test:
-	ocamlbuild -libs unix,str -Is src,tests tests/test.native
+	ocamlbuild -libs unix,str -Is recore/src,src,tests tests/test.native
 
 install:
 	ocamlfind install owebl META owebl.o owebl.cmi owebl.cma owebl.cmxa owebl.a

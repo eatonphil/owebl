@@ -1,10 +1,14 @@
 module Server = struct    
     open Response
+    open Recore.Std
 
-    let listen_sock = Unix.socket Unix.PF_INET Unix.SOCK_STREAM 0
+    let listen_sock =
+        let sock = Unix.socket Unix.PF_INET Unix.SOCK_STREAM 0 in
+        let _ = Unix.setsockopt sock Unix.SO_REUSEADDR true in
+        sock
 
     let read_from_sock socket =
-        let buffer = String.create 512 in
+        let buffer = Bytes.create 512 in
         let rec read_all request buffer =
             let r = Unix.read socket buffer 0 512 in
             if r < 512 then
@@ -24,11 +28,11 @@ module Server = struct
         then ValidRequest (Request.create_from_literal sock_contents)
         else EmptyRequest
 
-    let rec get_response (request: Request.t) (handlers: Handler.t list) =
+    let rec getResponse (request: Request.t) (handlers: Handler.t list) =
         match handlers with
         | [] -> Response.Empty
-        | (handler :: rest) -> (match handler#get_response request with
-            | Response.Empty -> get_response request rest
+        | (handler :: rest) -> (match handler#getResponse request with
+            | Response.Empty -> getResponse request rest
             | Response.ValidResponse valid_response -> Response.ValidResponse valid_response)
 
     let validate client_sock response =
@@ -41,11 +45,11 @@ module Server = struct
         match get_request client_sock with
         | EmptyRequest -> do_listen_helper client_sock listen_sock handlers
         | ValidRequest request -> begin
-            Printf.printf "%s\n%s\n" Utils.timestamp request#to_string;
+            Printf.printf "%s\n%s\n" (Time.rfc822 Time.local) request#to_string;
             match Unix.fork () with
             | 0 -> begin
                 Unix.close listen_sock;
-                validate client_sock (get_response request handlers);
+                validate client_sock (getResponse request handlers);
                 exit 0
             end
             | _ -> do_listen_helper client_sock listen_sock handlers

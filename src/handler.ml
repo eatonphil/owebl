@@ -1,13 +1,13 @@
 open Response
 open Rule
 
-type t = < get_response: Request.t -> Response.r >
+type t = < getResponse: Request.t -> Response.r >
 
 class handler (rule: RouteRule.t) (response: Response.t) =
     object(self)
-        method get_response (request: Request.t) : Response.r =
+        method getResponse (request: Request.t) : Response.r =
             match rule#matches request with
-            | RouteRule.Match -> response#get_response request
+            | RouteRule.Match -> response#getResponse request
             | RouteRule.NoMatch -> Response.Empty
     end
 
