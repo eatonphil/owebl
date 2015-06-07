@@ -1,11 +1,11 @@
 module RouteRule = struct
     type m = Match | NoMatch
 
-    type t = < verb_matches: Verb.t -> m; matches: Request.t -> m >
+    type t = < verbMatches: Verb.t -> m; matches: Request.t -> m >
 
     class virtual rule (uri: string) (verbs: Verb.t list) =
         object
-            method verb_matches (verb: Verb.t) : m =
+            method verbMatches (verb: Verb.t) : m =
                 match List.exists (fun nth_verb -> nth_verb = verb) verbs with
                 | true -> Match
                 | false -> NoMatch
@@ -22,8 +22,8 @@ module StaticRouteRule = struct
             inherit rule uri verbs as super
 
             method matches (request: Request.t) : m =
-                match (uri = request#get_path) with
-                | true -> super#verb_matches request#get_verb
+                match (uri = request#getPath) with
+                | true -> super#verbMatches request#getVerb
                 | false -> NoMatch
         end
 
@@ -40,8 +40,8 @@ module RegexRouteRule = struct
             val re = Str.regexp uri
 
             method matches (request: Request.t) : m =
-                match (Str.string_match re request#get_path 0) with
-                | true -> super#verb_matches request#get_verb
+                match (Str.string_match re request#getPath 0) with
+                | true -> super#verbMatches request#getVerb
                 | false -> NoMatch
         end
 

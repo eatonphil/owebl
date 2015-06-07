@@ -4,8 +4,10 @@ module Headers = String.Map
 
 let toStrings delim map =
     let fn key value accum =
-        let kv = (Printf.sprintf "%s%s%s" key delim value) in
-        (kv :: accum) in
+        if key <> "" && value <> "" then
+            let kv = (Printf.sprintf "%s%s%s" key delim value) in
+            (kv :: accum)
+        else accum in
     Headers.fold fn map []
 
 
