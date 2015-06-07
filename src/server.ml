@@ -21,7 +21,7 @@ module Server = struct
 
     let writeSock sock str =
         let len = String.len str in
-        let i = Unix.write sock str 0 len in
+        let _ = Unix.write sock str 0 len in
 	()
 
 
