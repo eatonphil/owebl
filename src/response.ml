@@ -51,7 +51,7 @@ module FileResponse = struct
                     Time.(<=) last_modified (Time.RFC822.read
                         (Request.Headers.get "If-Modified-Since" request#getHeaders))
                 then
-                    Response.ValidResponse "HTTP/1.1 304 Not Modified"
+                    Response.ValidResponse "HTTP/1.1 304 Not Modified\n\n"
                 else
                     let file_string = File.read file_name in
 

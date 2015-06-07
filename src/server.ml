@@ -3,7 +3,7 @@ module Server = struct
     open Recore.Std
 
 
-    let readFromSock socket =
+    let readSock socket =
         let buffer = Bytes.create 512 in
         let rec read_all request buffer =
             let r = Unix.read socket buffer 0 512 in
@@ -19,33 +19,28 @@ module Server = struct
         sock
 
 
-    let write_to_sock sock str =
+    let writeSock sock str =
         let len = String.len str in
-        let _ = Unix.write sock str 0 len in ()
+        let i = Unix.write sock str 0 len in
+	()
 
 
     type r = EmptyRequest | ValidRequest of Request.t
 
 
     let getRequest sock : r =
-        let sock_contents = readFromSock sock in
+        let sock_contents = readSock sock in
         if String.len sock_contents <> 0
         then ValidRequest (Request.createFromLiteral sock_contents)
         else EmptyRequest
 
 
-    let rec getResponse (request: Request.t) (handlers: Handler.t list) =
+    let rec sendResponse (request: Request.t) (handlers: Handler.t list) sock =
         match handlers with
-        | [] -> Response.Empty
+        | [] -> ()
         | (handler :: rest) -> (match handler#getResponse request with
-            | Response.Empty -> getResponse request rest
-            | Response.ValidResponse valid_response -> Response.ValidResponse valid_response)
-
-
-    let validate client_sock response =
-        match response with
-        | Response.Empty -> ()
-        | Response.ValidResponse valid_response -> write_to_sock client_sock valid_response
+            | Response.Empty -> sendResponse request rest sock
+            | Response.ValidResponse valid_response -> writeSock sock valid_response)
 
 
     let rec doListen listenSock handlers =
@@ -57,7 +52,7 @@ module Server = struct
             match Unix.fork () with
             | 0 -> begin
                 Unix.close listenSock;
-                validate client_sock (getResponse request handlers);
+                sendResponse request handlers client_sock;
                 exit 0
             end
             | _ -> doListenHelper client_sock listenSock handlers
