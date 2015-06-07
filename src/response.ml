@@ -10,8 +10,9 @@ module Response = struct
     let http_response (u_response: string) (u_status: string)
     (u_ctype: string) (u_ccharset: string) (u_headers: string list) =
         ValidResponse (Printf.sprintf "HTTP/1.1 %s\nContent-Type: %s;\
-        charset=%s\nContent-Length: %d\n\n%s" u_status u_ctype
-        u_ccharset (String.length u_response) u_response)
+        charset=%s\nContent-Length: %d\n%s\n\n%s" u_status u_ctype
+        u_ccharset (String.length u_response)
+        (String.join "\n" u_headers) u_response)
 
     class virtual response =
         object
@@ -41,23 +42,26 @@ module FileResponse = struct
         object
             method getResponse (request: Request.t) : r =
                 let file_name =
-                    if static_file = "" then "." ^ request#get_path
-                    else static_file
+                    if static_file = "" then "." ^ request#getPath
+                    else static_file in
 
-                let last_modified =
-                    Time.rfc822 (Unix.gmtime (Unix.stat file_name).Unix.st_mtime)
+                let last_modified = Unix.gmtime (Unix.stat file_name).Unix.st_mtime in
 
-                let file_string =
-                    File.read file_name in
+                if Request.Headers.exists "If-Modified-Since" request#getHeaders &&
+                    Time.(<=) last_modified (Time.RFC822.read
+                        (Request.Headers.get "If-Modified-Since" request#getHeaders))
+                then
+                    Response.ValidResponse "HTTP/1.1 304 Not Modified"
+                else
+                    let file_string = File.read file_name in
 
-                let mime_type =
-                    Mime.getMimeType file_name in
+                    let mime_type = Mime.getMimeType file_name in
 
-                let cache_headers = [
-                    "Last-Modified: " ^ last_modified
-                ] in
+                    let cache_headers = [
+                        "Last-Modified: " ^ (Time.RFC822.write last_modified)
+                    ] in
 
-                Response.http_response file_string "200 OK" mime_type "utf-8" cache_headers
+                    Response.http_response file_string "200 OK" mime_type "utf-8" cache_headers
         end
 
     let create
@@ -73,7 +77,7 @@ module TemplateResponse = struct
 
     class template_response
         (static_file: string)
-        (context: Context.t) = 
+        (context: Context.c) = 
         object
             inherit FileResponse.file_response static_file as super
 
@@ -82,14 +86,14 @@ module TemplateResponse = struct
                 match response with
                 | Response.Empty -> Response.Empty
                 | Response.ValidResponse response -> let tmpl_resp =
-                    let response_body = Request.create_from_literal response in
-                    Template.templatize response_body#get_body context request in
+                    let response_body = Request.createFromLiteral response in
+                    Template.templatize response_body#getBody context request in
                 SimpleResponse.simple_http_response tmpl_resp
         end
 
     let create
         ?(static_file: string = "")
-        ?(context: Context.t = Context.make [])
+        ?(context: Context.c = Context.empty)
         () =
             new template_response static_file context
 end

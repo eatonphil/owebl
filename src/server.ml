@@ -2,12 +2,8 @@ module Server = struct
     open Response
     open Recore.Std
 
-    let listen_sock =
-        let sock = Unix.socket Unix.PF_INET Unix.SOCK_STREAM 0 in
-        let _ = Unix.setsockopt sock Unix.SO_REUSEADDR true in
-        sock
 
-    let read_from_sock socket =
+    let readFromSock socket =
         let buffer = Bytes.create 512 in
         let rec read_all request buffer =
             let r = Unix.read socket buffer 0 512 in
@@ -16,17 +12,27 @@ module Server = struct
             else read_all (request ^ buffer) buffer in
         read_all "" buffer
 
+
+    let listenSock =
+        let sock = Unix.socket Unix.PF_INET Unix.SOCK_STREAM 0 in
+        let _ = Unix.setsockopt sock Unix.SO_REUSEADDR true in
+        sock
+
+
     let write_to_sock sock str =
-        let len = String.length str in
+        let len = String.len str in
         let _ = Unix.write sock str 0 len in ()
+
 
     type r = EmptyRequest | ValidRequest of Request.t
 
-    let get_request sock : r =
-        let sock_contents = read_from_sock sock in
-        if String.length sock_contents <> 0
-        then ValidRequest (Request.create_from_literal sock_contents)
+
+    let getRequest sock : r =
+        let sock_contents = readFromSock sock in
+        if String.len sock_contents <> 0
+        then ValidRequest (Request.createFromLiteral sock_contents)
         else EmptyRequest
+
 
     let rec getResponse (request: Request.t) (handlers: Handler.t list) =
         match handlers with
@@ -35,41 +41,46 @@ module Server = struct
             | Response.Empty -> getResponse request rest
             | Response.ValidResponse valid_response -> Response.ValidResponse valid_response)
 
+
     let validate client_sock response =
         match response with
         | Response.Empty -> ()
         | Response.ValidResponse valid_response -> write_to_sock client_sock valid_response
 
-    let rec do_listen listen_sock handlers =
-        let (client_sock, _) = Unix.accept listen_sock in
-        match get_request client_sock with
-        | EmptyRequest -> do_listen_helper client_sock listen_sock handlers
+
+    let rec doListen listenSock handlers =
+        let (client_sock, _) = Unix.accept listenSock in
+        match getRequest client_sock with
+        | EmptyRequest -> doListenHelper client_sock listenSock handlers
         | ValidRequest request -> begin
-            Printf.printf "%s\n%s\n" (Time.rfc822 Time.local) request#to_string;
+            Printf.printf "%s\n%s\n\n" (Time.RFC822.write Time.local) request#toString;
             match Unix.fork () with
             | 0 -> begin
-                Unix.close listen_sock;
+                Unix.close listenSock;
                 validate client_sock (getResponse request handlers);
                 exit 0
             end
-            | _ -> do_listen_helper client_sock listen_sock handlers
+            | _ -> doListenHelper client_sock listenSock handlers
         end;
         ()
 
-    and do_listen_helper client_sock listen_sock handlers =
+
+    and doListenHelper client_sock listenSock handlers =
         Unix.close client_sock;
-        do_listen listen_sock handlers;
+        doListen listenSock handlers;
         ()
+
 
     class server address port handlers =
         object
             method serve =
                 let addr_inet =
                     (Unix.ADDR_INET (Unix.inet_addr_of_string address, port)) in
-                Unix.bind listen_sock addr_inet;
-                Unix.listen listen_sock 8;
-                do_listen listen_sock handlers
+                Unix.bind listenSock addr_inet;
+                Unix.listen listenSock 8;
+                doListen listenSock handlers
         end
+
 
     let create address port handlers =
         Sys.set_signal Sys.sigchld Sys.Signal_ignore;
@@ -79,10 +90,14 @@ end
 module SimpleServer = struct
     include Server
 
+
     let default_port = 9090
     let default_address = "127.0.0.1"
 
+
     let create handlers = Server.create default_address default_port handlers
+
+
     let serve handlers =
         let server = create handlers in
         server#serve;
