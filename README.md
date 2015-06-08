@@ -67,6 +67,14 @@ to owebl/src in your ocamlbuild line:
 
 Or edit included makefile entry for `simpleserver` to your needs.
 
+Companies
+---------
+
+Companies that use OWebl include:
+
+- [P&E - Digital Product Consultancy](https://parkandeaton.com)
+
+
 Contribute
 ----------
 
