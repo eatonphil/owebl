@@ -22,6 +22,7 @@
 * move from pure forking to async io with forking for larger connection support
 * add gzip support, vary header
 * set cache headers from a config
+* convert any remaining regex usages to ocaml-re (within Recore)
 
 ## Misc
 
