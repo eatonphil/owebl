@@ -1,6 +1,8 @@
 OWebl
 ====
 
+# DON'T USE THIS! IF YOU ARE CONSIDERING WRITING OCAML WEB APPLICATIONS, RECONSIDER! IN OCAML, THERE ARE PERFORMANT WEB FRAMEWORKS WITH TERRIBLE INTERFACES AND THERE ARE ALSO TERRIBLE WEB FRAMEWORKS WITH AWESOME INTERFACES (this one). YOU WILL NOT FIND AN OCAML WEB FRAMEWORK WITH BOTH!
+
 [![Build Status](https://travis-ci.org/eatonphil/owebl.svg?branch=master)](https://travis-ci.org/eatonphil/owebl/)
 
 
@@ -66,14 +68,6 @@ to owebl/src in your ocamlbuild line:
     $ ocamlbuild -libs unix,str -Is path/to/owebl/src my_server.native
 
 Or edit included makefile entry for `simpleserver` to your needs.
-
-Companies
----------
-
-Companies that use OWebl include:
-
-- [P&E - Digital Product Consultancy](https://parkandeaton.com)
-
 
 Contribute
 ----------
