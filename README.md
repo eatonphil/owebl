@@ -3,7 +3,7 @@ OWebl
 
 # DON'T USE THIS!
 
-IF YOU ARE CONSIDERING WRITING OCAML WEB APPLICATIONS, RECONSIDER! IN OCAML, THERE ARE PERFORMANT WEB FRAMEWORKS WITH TERRIBLE INTERFACES AND THERE ARE ALSO TERRIBLE WEB FRAMEWORKS WITH AWESOME INTERFACES (this one). AT THE TIME OF WRITING, I HAVE NOT FOUND AN OCAML WEB FRAMEWORK THAT HAS BOTH!
+If you are considering writing OCaml web applications, reconsider! In OCaml, there are performant web frameworks with terrible interfaces and there are also terrible web frameworks with pretty interfaces (this one). At the time of writing, I have not found an OCaml web framework that has both!
 
 # Introduction
 
